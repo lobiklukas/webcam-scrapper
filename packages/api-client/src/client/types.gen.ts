@@ -38,7 +38,7 @@ export type WebcamsControllerListData = {
 
 export type WebcamsControllerListResponses = {
 	/**
-	 * Locations matching the filter, with their camera count.
+	 * Locations matching the filter, each with a camera and its newest frame.
 	 */
 	200: Array<{
 		id: number;
@@ -47,6 +47,19 @@ export type WebcamsControllerListResponses = {
 		long: number;
 		lat: number;
 		camCount: number;
+		cam: {
+			id: number;
+			originalId: string;
+			retrievalUrl: string | null;
+			inCollection: boolean;
+		} | null;
+		frame: {
+			id: string;
+			capturedAt: string;
+			contentType: string;
+			bytes: number;
+			url: string;
+		} | null;
 	}>;
 };
 
@@ -91,3 +104,26 @@ export type WebcamsControllerFindOneResponses = {
 
 export type WebcamsControllerFindOneResponse =
 	WebcamsControllerFindOneResponses[keyof WebcamsControllerFindOneResponses];
+
+export type FramesControllerFindOneData = {
+	body?: never;
+	path: {
+		id: string;
+	};
+	query?: never;
+	url: '/api/frames/{id}';
+};
+
+export type FramesControllerFindOneErrors = {
+	/**
+	 * No frame with that id.
+	 */
+	404: unknown;
+};
+
+export type FramesControllerFindOneResponses = {
+	/**
+	 * The stored frame, with the `Content-Type` it was captured as.
+	 */
+	200: unknown;
+};

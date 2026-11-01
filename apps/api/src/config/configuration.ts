@@ -11,6 +11,15 @@ export interface AppConfig {
 	betterAuthSecret: string;
 	/** Node environment, drives Swagger exposure. */
 	nodeEnv: string;
+	/** Object storage the worker writes frames to; the API only reads them back out. */
+	storage: {
+		endpoint: string;
+		region: string;
+		bucket: string;
+		accessKeyId: string;
+		secretAccessKey: string;
+		forcePathStyle: boolean;
+	};
 }
 
 function required(name: string): string {
@@ -32,6 +41,14 @@ export default (): AppConfig => {
 		apiOrigin: process.env.API_ORIGIN ?? `http://localhost:${port}`,
 		databaseUrl: required('DATABASE_URL'),
 		betterAuthSecret: required('BETTER_AUTH_SECRET'),
-		nodeEnv: process.env.NODE_ENV ?? 'development'
+		nodeEnv: process.env.NODE_ENV ?? 'development',
+		storage: {
+			endpoint: process.env.S3_ENDPOINT ?? 'http://localhost:9000',
+			region: process.env.S3_REGION ?? 'us-east-1',
+			bucket: process.env.S3_BUCKET ?? 'webcams-dev',
+			accessKeyId: process.env.S3_ACCESS_KEY_ID ?? 'minioadmin',
+			secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? 'minioadmin',
+			forcePathStyle: process.env.S3_FORCE_PATH_STYLE !== 'false'
+		}
 	};
 };

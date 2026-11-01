@@ -5,10 +5,10 @@ import {
 	listWebcamsQueryDto,
 	webcamDto,
 	webcamIdParamDto,
-	webcamSummaryDto,
+	webcamListItemDto,
 	type ListWebcamsQuery,
 	type WebcamDto,
-	type WebcamSummaryDto
+	type WebcamListItemDto
 } from '@webcam-scrapper/contracts/dto';
 // Value import: `emitDecoratorMetadata` needs the class at runtime for constructor injection.
 // oxlint-disable-next-line typescript/consistent-type-imports
@@ -27,13 +27,13 @@ export class WebcamsController {
 
 	@Get()
 	@ApiOkResponse({
-		standardSchema: webcamSummaryDto,
+		standardSchema: webcamListItemDto,
 		isArray: true,
-		description: 'Locations matching the filter, with their camera count.'
+		description: 'Locations matching the filter, each with a camera and its newest frame.'
 	})
 	list(
 		@Query({ schema: listWebcamsQueryDto }) query: ListWebcamsQuery
-	): Promise<WebcamSummaryDto[]> {
+	): Promise<WebcamListItemDto[]> {
 		return this.webcams.list(query);
 	}
 

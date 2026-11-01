@@ -9,6 +9,9 @@ import type {
 	TDataShape
 } from './client/index.js';
 import type {
+	FramesControllerFindOneData,
+	FramesControllerFindOneErrors,
+	FramesControllerFindOneResponses,
 	HealthControllerCheckData,
 	HealthControllerCheckResponses,
 	WebcamsControllerFindOneData,
@@ -60,3 +63,12 @@ export const webcamsControllerFindOne = <ThrowOnError extends boolean = false>(
 		WebcamsControllerFindOneErrors,
 		ThrowOnError
 	>({ url: '/api/webcams/{id}', ...options });
+
+export const framesControllerFindOne = <ThrowOnError extends boolean = false>(
+	options: Options<FramesControllerFindOneData, ThrowOnError>
+): RequestResult<FramesControllerFindOneResponses, FramesControllerFindOneErrors, ThrowOnError> =>
+	(options.client ?? client).get<
+		FramesControllerFindOneResponses,
+		FramesControllerFindOneErrors,
+		ThrowOnError
+	>({ url: '/api/frames/{id}', ...options });

@@ -6,6 +6,7 @@ import { createDb } from '@webcam-scrapper/db';
 import { createAuth } from './auth/auth.js';
 import configuration, { type AppConfig } from './config/configuration.js';
 import { DB, type AppDatabase } from './db/db.js';
+import { FramesModule } from './frames/frames.module.js';
 import { HealthModule } from './health/health.module.js';
 import { WebcamsModule } from './webcams/webcams.module.js';
 
@@ -36,7 +37,8 @@ import { WebcamsModule } from './webcams/webcams.module.js';
 			})
 		}),
 		HealthModule,
-		WebcamsModule
+		WebcamsModule,
+		FramesModule
 	]
 })
 export class AppModule {}

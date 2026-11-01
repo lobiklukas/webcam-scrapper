@@ -49,6 +49,17 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
 - **Local object storage is `rustfs` (S3-compatible), not MinIO.** The `minio/minio` images are not
   pullable in this environment; the worker only speaks S3, so switching back is a `S3_*` change.
   The bucket is created by `pnpm bucket:create`, not by the worker at boot.
+- **`apps/api` reads frame bytes out of object storage, it never writes them.**
+  `GET /api/frames/:id` looks the frame row up in Postgres and streams the object the worker stored,
+  so the browser never learns the storage host or the bucket layout. Both apps read the same `S3_*`
+  variables (config: `apps/api/src/config/configuration.ts`, `apps/worker/src/config.ts`); the API
+  only needs storage reachable once someone asks for a frame.
+- **Drizzle relations live in `packages/db/src/schema/relations.ts`**, not next to the tables —
+  `webcams.ts` and `frames.ts` already import each other, so a `relations()` call there would read a
+  table before it is defined. Listing endpoints use `db.query.<table>…` with `with:` instead of
+  hand-written joins, with one caveat: inside a relational query drizzle rewrites _every_ column
+  reference to the current relation's alias, so `${otherTable.column}` in `extras`/`orderBy` renders
+  the wrong table. Correlate through a second query (see `WebcamsService.countCams`) instead.
 - **Turbo passes the worker's runtime env through `globalPassThroughEnv`**, and both `dev` and
   `worker` `dependsOn: ["^build"]` so `packages/db` has a `dist` before either starts. Without that
   dependency the worker's first import races the db build.

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { framePreviewDto } from './frames.js';
 
 /** One camera view published on a location. */
 export const camDto = z.object({
@@ -23,6 +24,17 @@ export const webcamSummaryDto = z.object({
 });
 
 export type WebcamSummaryDto = z.infer<typeof webcamSummaryDto>;
+
+/**
+ * A location in the grid: the summary, the one camera chosen as its representative and that
+ * camera's newest frame. `cam` and `frame` are null when a location has no camera or no frame yet.
+ */
+export const webcamListItemDto = webcamSummaryDto.extend({
+	cam: camDto.nullable(),
+	frame: framePreviewDto.nullable()
+});
+
+export type WebcamListItemDto = z.infer<typeof webcamListItemDto>;
 
 /** A location plus the camera views it carries. */
 export const webcamDto = webcamSummaryDto.extend({ cams: z.array(camDto) });

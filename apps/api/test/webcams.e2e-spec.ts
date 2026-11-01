@@ -2,7 +2,7 @@ import { StandardSchemaValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { TestingModule } from '@nestjs/testing';
-import { webcamDto, webcamSummaryDto } from '@webcam-scrapper/contracts/dto';
+import { webcamListItemDto, webcamDto } from '@webcam-scrapper/contracts/dto';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { AppModule } from '../src/app.module.js';
@@ -29,7 +29,7 @@ describe('webcams (e2e)', () => {
 		const response = await request(app.getHttpServer()).get('/api/webcams').expect(200);
 
 		// The same DTO the controller documents, so response drift fails here too.
-		expect(() => webcamSummaryDto.array().parse(response.body)).not.toThrow();
+		expect(() => webcamListItemDto.array().parse(response.body)).not.toThrow();
 	});
 
 	it('rejects a limit outside the schema', async () => {
@@ -43,7 +43,7 @@ describe('webcams (e2e)', () => {
 
 	it('returns a location with its cameras', async () => {
 		const list = await request(app.getHttpServer()).get('/api/webcams?limit=1').expect(200);
-		const [first] = webcamSummaryDto.array().parse(list.body);
+		const [first] = webcamListItemDto.array().parse(list.body);
 
 		// A fresh database has no catalogue yet; the detail shape is covered by the unit spec.
 		if (!first) return;
