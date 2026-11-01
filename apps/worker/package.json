@@ -1,0 +1,29 @@
+{
+	"name": "@webcam-scrapper/worker",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"worker": "node --env-file-if-exists=.env --import tsx --watch src/index.ts",
+		"dev": "pnpm worker",
+		"worker:once": "node --env-file-if-exists=.env --import tsx src/index.ts --once",
+		"build": "tsc -p tsconfig.json",
+		"start": "node --env-file-if-exists=.env dist/index.js",
+		"check": "tsc --noEmit",
+		"bucket:create": "node --env-file-if-exists=.env --import tsx src/tools/ensure-bucket.ts"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.1161.0",
+		"@webcam-scrapper/db": "workspace:*",
+		"amqplib": "^2.2.0",
+		"drizzle-orm": "^0.45.2",
+		"image-size": "^2.0.4",
+		"ipaddr.js": "^2.5.0",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:"
+	}
+}

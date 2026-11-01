@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
 	boolean,
 	doublePrecision,
@@ -8,18 +9,11 @@ import {
 	timestamp
 } from 'drizzle-orm/pg-core';
 
-/**
- * A camera site: one mast or station that groups one or more camera views.
- * `originalId` is the id the upstream source uses (a Digitraffic station id), which makes it
- * the natural key the scraper upserts on.
- */
 export const location = pgTable('location', {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	originalId: text('original_id').notNull().unique(),
-	name: text('name').notNull(),
-	/** Longitude in decimal degrees, WGS 84. */
+	name: text().notNull(),
 	long: doublePrecision('long').notNull(),
-	/** Latitude in decimal degrees, WGS 84. */
 	lat: doublePrecision('lat').notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
@@ -28,10 +22,6 @@ export const location = pgTable('location', {
 		.notNull()
 });
 
-/**
- * One camera view on a location. `originalId` is the upstream preset id; `retrievalUrl` is where
- * the frame is downloaded from.
- */
 export const cam = pgTable(
 	'cam',
 	{
@@ -41,13 +31,26 @@ export const cam = pgTable(
 			.notNull()
 			.references(() => location.id, { onDelete: 'cascade' }),
 		retrievalUrl: text('retrieval_url'),
-		/** Whether the upstream source still publishes this view. */
 		inCollection: boolean('in_collection').default(true).notNull(),
+		pollIntervalS: integer('poll_interval_s').default(600).notNull(),
+		nextPollAt: timestamp('next_poll_at', { withTimezone: true }).defaultNow().notNull(),
+		enabled: boolean().default(true).notNull(),
+		failureCount: integer('failure_count').default(0).notNull(),
+		lastSha256: text('last_sha256'),
+		lastEtag: text('last_etag'),
+		lastModified: text('last_modified'),
+		lastOkAt: timestamp('last_ok_at', { withTimezone: true }),
+		lastFrameAt: timestamp('last_frame_at', { withTimezone: true }),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at')
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())
 			.notNull()
 	},
-	(table) => [index('cam_location_id_idx').on(table.locationId)]
+	(table) => [
+		index('cam_location_id_idx').on(table.locationId),
+		index('cam_due_idx')
+			.on(table.nextPollAt)
+			.where(sql`enabled and retrieval_url is not null`)
+	]
 );

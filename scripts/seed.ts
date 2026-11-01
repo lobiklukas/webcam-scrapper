@@ -103,7 +103,13 @@ export async function seed() {
 				const locationId = locationIds.get(row.locationOriginalId);
 				if (locationId === undefined) return [];
 				const { locationOriginalId: _, ...values } = row;
-				return [{ ...values, locationId }];
+				return [
+					{
+						...values,
+						locationId,
+						nextPollAt: sql`now() + random() * interval '600 seconds'`
+					}
+				];
 			});
 
 			const savedCams = await tx

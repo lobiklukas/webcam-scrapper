@@ -5,26 +5,29 @@ Nest API. Read this before changing anything.
 
 ## Repo map
 
-| Path                  | What it is                                                                      |
-| --------------------- | ------------------------------------------------------------------------------- |
-| `apps/web`            | SvelteKit 3 app (Svelte 5, Tailwind 4, adapter-node). No DB, no auth of its own |
-| `apps/api`            | Nest 12 app (health, config, Swagger, better-auth, drizzle client, Postgres)    |
-| `packages/db`         | drizzle schema (incl. generated better-auth tables), client factory, migrations |
-| `packages/contracts`  | zod DTOs shared by api and web + the generated `openapi.json`                   |
-| `packages/api-client` | generated fetch client, SDK and TanStack Query options for the web app          |
-| `scripts`             | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts into Postgres   |
-| `docs/research`       | Product research: Windy teardown, camera sources, management flows, ingestion   |
+| Path                  | What it is                                                                                      |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| `apps/web`            | SvelteKit 3 app (Svelte 5, Tailwind 4, adapter-node). No DB, no auth of its own                 |
+| `apps/api`            | Nest 12 app (health, config, Swagger, better-auth, drizzle client, Postgres)                    |
+| `apps/worker`         | scrape worker: plain Node + tsx, no Nest; claims due cams, stores frames, publishes to RabbitMQ |
+| `packages/db`         | drizzle schema (incl. generated better-auth tables), client factory, migrations                 |
+| `packages/contracts`  | zod DTOs shared by api and web + the generated `openapi.json`                                   |
+| `packages/api-client` | generated fetch client, SDK and TanStack Query options for the web app                          |
+| `scripts`             | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts into Postgres                   |
+| `docs/research`       | Product research: Windy teardown, camera sources, management flows, ingestion                   |
 
 ## Commands (always from the repo root)
 
 ```sh
-pnpm dev         # turbo, both apps: web :5173, api :3000
-pnpm lint        # oxlint + type-aware oxlint over apps/api
+pnpm dev         # turbo: web :5173, api :3000, and the scrape worker (hot reload)
+pnpm lint        # oxlint + type-aware oxlint over apps/api and apps/worker
 pnpm fmt         # oxfmt --write          (pnpm fmt:check for CI)
 pnpm check       # svelte-check + tsc --noEmit via turbo
 pnpm test        # vitest in both apps
 pnpm build       # nest build + vite build (adapter-node)
-pnpm db:start    # docker compose up (Postgres 5432, root compose.yaml)
+pnpm db:start    # docker compose up: Postgres 5432, object storage 9000/9001, RabbitMQ 5672/15672
+pnpm worker      # turbo, scrape worker (apps/worker, hot reload via tsx)
+pnpm bucket:create  # create the S3 bucket once after `pnpm db:start`
 pnpm db:push     # apply packages/db schema (db:generate / db:migrate for SQL)
 pnpm auth:schema # regenerate packages/db/src/schema/auth.ts, then run pnpm fmt
 pnpm seed        # upsert the Digitraffic catalogue into location/cam (needs DATABASE_URL)
@@ -36,6 +39,22 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
 
 ## Non-obvious constraints
 
+- **`apps/worker` is not Nest and owns the frame writes.** It reads `cam`, claims due rows
+  (`next_poll_at <= now()` with `FOR UPDATE SKIP LOCKED`), and is the only writer of `frame`,
+  `poll_attempt` and the poll columns of `cam`. `apps/api` reads those tables and never writes
+  them. It has its own `src/config.ts` (the only `process.env` reader in that app) because it runs
+  without a Nest container. `pnpm dev` starts it next to web and api; `pnpm worker` runs only it.
+  `SCRAPE_ENABLED=false` in `apps/worker/.env` keeps it running without polling, which is the sane
+  default when the seeded catalogue is due (`pnpm dev` otherwise polls a few cams per second).
+- **Local object storage is `rustfs` (S3-compatible), not MinIO.** The `minio/minio` images are not
+  pullable in this environment; the worker only speaks S3, so switching back is a `S3_*` change.
+  The bucket is created by `pnpm bucket:create`, not by the worker at boot.
+- **Turbo passes the worker's runtime env through `globalPassThroughEnv`**, and both `dev` and
+  `worker` `dependsOn: ["^build"]` so `packages/db` has a `dist` before either starts. Without that
+  dependency the worker's first import races the db build.
+- **The broker is RabbitMQ, and producers only declare the exchange.** `frames` is a durable topic
+  exchange; the worker publishes `frame.stored` with a persistent, confirmed message. A consumer
+  owns its own queue + binding, so no queue exists until the processing consumer lands.
 - **`apps/web` targets Node** via `@sveltejs/adapter-node`: `build` is `vite build`, `start` is
   `node --env-file-if-exists=.env build` (the env file is what supplies `PORT`, `API_URL`, `ORIGIN`
   in production). Do not reintroduce `bun --bun` or an adapter that needs another runtime.
@@ -69,7 +88,8 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
   `apps/web/.oxlintrc.json`), because oxlint has no native Svelte plugin. Svelte _formatting_ needs
   `"svelte": true` in `.oxfmtrc.json` plus the `svelte` package installed. Both are load-bearing.
 - **Type-aware rules only fire with `--type-aware`.** Root `pnpm lint` already runs a second pass
-  over `apps/api`; a bare `oxlint` will silently skip `typescript/no-floating-promises`.
+  over `apps/api` and `apps/worker`; a bare `oxlint` will silently skip
+  `typescript/no-floating-promises`.
 - **Shared dependency versions live in `catalog:`** in `pnpm-workspace.yaml`. Reference them as
   `"catalog:"`, never by pasting a version into an app.
 - **pnpm 12 does not run dependency build scripts** unless allowed in `allowBuilds` in
@@ -93,6 +113,8 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
 
 ## Conventions
 
+- No explanatory comments in source: names and structure carry the intent. Applies to `apps/worker`
+  and to the drizzle schema; generated files keep whatever their generator emits.
 - TypeScript everywhere, ESM only (`"type": "module"`, `nodenext` resolution). Import local files
   with the `.js` extension in `apps/api` (Node ESM).
 - API DTOs are **zod** schemas in `packages/contracts/src/dto/`, imported as

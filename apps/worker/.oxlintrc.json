@@ -1,0 +1,15 @@
+{
+	"$schema": "../../node_modules/oxlint/configuration_schema.json",
+	"extends": ["../../.oxlintrc.json"],
+	"plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise", "node"],
+	"env": {
+		"node": true,
+		"es2024": true
+	},
+	"rules": {
+		"typescript/no-floating-promises": "error",
+		"no-console": "off",
+		"eslint/no-await-in-loop": "off"
+	},
+	"ignorePatterns": ["**/dist/**"]
+}
