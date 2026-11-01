@@ -30,6 +30,7 @@ export type WebcamsControllerListData = {
 	path?: never;
 	query?: {
 		q?: string;
+		source?: string;
 		limit?: number;
 		offset?: number;
 	};
@@ -66,6 +67,23 @@ export type WebcamsControllerListResponses = {
 
 export type WebcamsControllerListResponse =
 	WebcamsControllerListResponses[keyof WebcamsControllerListResponses];
+
+export type WebcamsControllerListSourcesData = {
+	body?: never;
+	path?: never;
+	query?: never;
+	url: '/api/webcams/sources';
+};
+
+export type WebcamsControllerListSourcesResponses = {
+	/**
+	 * The provider ids in the catalogue, for the provider filter.
+	 */
+	200: Array<string>;
+};
+
+export type WebcamsControllerListSourcesResponse =
+	WebcamsControllerListSourcesResponses[keyof WebcamsControllerListSourcesResponses];
 
 export type WebcamsControllerFindOneData = {
 	body?: never;

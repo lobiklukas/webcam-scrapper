@@ -14,7 +14,8 @@ import {
 	healthControllerCheck,
 	type Options,
 	webcamsControllerFindOne,
-	webcamsControllerList
+	webcamsControllerList,
+	webcamsControllerListSources
 } from '../sdk.gen.js';
 import type {
 	FramesControllerFindOneData,
@@ -25,7 +26,9 @@ import type {
 	WebcamsControllerFindOneData,
 	WebcamsControllerFindOneResponse,
 	WebcamsControllerListData,
-	WebcamsControllerListResponse
+	WebcamsControllerListResponse,
+	WebcamsControllerListSourcesData,
+	WebcamsControllerListSourcesResponse
 } from '../types.gen.js';
 
 export type QueryKey<TOptions extends Options> = [
@@ -190,6 +193,31 @@ export const webcamsControllerListInfiniteOptions = (
 	);
 	return opts as Omit<typeof opts, 'initialData'>;
 };
+
+export const webcamsControllerListSourcesQueryKey = (
+	options?: Options<WebcamsControllerListSourcesData>
+) => createQueryKey('webcamsControllerListSources', options);
+
+export const webcamsControllerListSourcesOptions = (
+	options?: Options<WebcamsControllerListSourcesData>
+) =>
+	queryOptions<
+		WebcamsControllerListSourcesResponse,
+		DefaultError,
+		WebcamsControllerListSourcesResponse,
+		ReturnType<typeof webcamsControllerListSourcesQueryKey>
+	>({
+		queryFn: async ({ queryKey, signal }) => {
+			const { data } = await webcamsControllerListSources({
+				...options,
+				...queryKey[0],
+				signal,
+				throwOnError: true
+			});
+			return data;
+		},
+		queryKey: webcamsControllerListSourcesQueryKey(options)
+	});
 
 export const webcamsControllerFindOneQueryKey = (options: Options<WebcamsControllerFindOneData>) =>
 	createQueryKey('webcamsControllerFindOne', options);

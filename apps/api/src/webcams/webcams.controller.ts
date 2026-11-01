@@ -6,6 +6,7 @@ import {
 	webcamDto,
 	webcamIdParamDto,
 	webcamListItemDto,
+	webcamSourceDto,
 	type ListWebcamsQuery,
 	type WebcamDto,
 	type WebcamListItemDto
@@ -35,6 +36,16 @@ export class WebcamsController {
 		@Query({ schema: listWebcamsQueryDto }) query: ListWebcamsQuery
 	): Promise<WebcamListItemDto[]> {
 		return this.webcams.list(query);
+	}
+
+	@Get('sources')
+	@ApiOkResponse({
+		standardSchema: webcamSourceDto,
+		isArray: true,
+		description: 'The provider ids in the catalogue, for the provider filter.'
+	})
+	listSources(): Promise<string[]> {
+		return this.webcams.listSources();
 	}
 
 	@Get(':id')

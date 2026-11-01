@@ -60,6 +60,15 @@
 						}
 					},
 					{
+						"name": "source",
+						"required": false,
+						"in": "query",
+						"schema": {
+							"type": "string",
+							"maxLength": 100
+						}
+					},
+					{
 						"name": "limit",
 						"required": false,
 						"in": "query",
@@ -193,6 +202,30 @@
 											"frame"
 										],
 										"additionalProperties": false
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"webcams"
+				]
+			}
+		},
+		"/api/webcams/sources": {
+			"get": {
+				"operationId": "WebcamsController_listSources",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "The provider ids in the catalogue, for the provider filter.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "string"
 									}
 								}
 							}

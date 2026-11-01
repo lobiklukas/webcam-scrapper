@@ -46,12 +46,20 @@ export const webcamDto = webcamSummaryDto.extend({ cams: z.array(camDto) });
 
 export type WebcamDto = z.infer<typeof webcamDto>;
 
-/** `q` matches the station name as a case-insensitive substring. */
+/**
+ * `q` matches the station name as a case-insensitive substring, `source` keeps one provider id.
+ */
 export const listWebcamsQueryDto = z.object({
 	q: z.string().trim().max(100).optional(),
+	source: z.string().trim().max(100).optional(),
 	limit: z.coerce.number().int().min(1).max(200).default(50),
 	offset: z.coerce.number().int().min(0).default(0)
 });
+
+/** One provider id (`location.source`), as offered by the provider filter. */
+export const webcamSourceDto = z.string();
+
+export type WebcamSourceDto = z.infer<typeof webcamSourceDto>;
 
 export type ListWebcamsQuery = z.infer<typeof listWebcamsQueryDto>;
 

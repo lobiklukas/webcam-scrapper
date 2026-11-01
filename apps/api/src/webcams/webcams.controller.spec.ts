@@ -48,6 +48,7 @@ describe('WebcamsController', () => {
 	let controller: WebcamsController;
 	const service = {
 		list: vi.fn<(query: ListWebcamsQuery) => Promise<WebcamListItemDto[]>>(),
+		listSources: vi.fn<() => Promise<string[]>>(),
 		findOne: vi.fn<(id: number) => Promise<WebcamDto>>()
 	};
 
@@ -71,9 +72,15 @@ describe('WebcamsController', () => {
 	it('forwards the filter to the service', async () => {
 		service.list.mockResolvedValue([]);
 
-		await controller.list({ q: 'inkoo', limit: 10, offset: 5 });
+		await controller.list({ q: 'inkoo', source: 'tfl', limit: 10, offset: 5 });
 
-		expect(service.list).toHaveBeenCalledWith({ q: 'inkoo', limit: 10, offset: 5 });
+		expect(service.list).toHaveBeenCalledWith({ q: 'inkoo', source: 'tfl', limit: 10, offset: 5 });
+	});
+
+	it('returns the provider ids the service lists', async () => {
+		service.listSources.mockResolvedValue(['caltrans', 'digitraffic']);
+
+		await expect(controller.listSources()).resolves.toEqual(['caltrans', 'digitraffic']);
 	});
 
 	it('returns one location with its cameras', async () => {

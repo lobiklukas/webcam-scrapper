@@ -20,7 +20,9 @@ import type {
 	WebcamsControllerFindOneErrors,
 	WebcamsControllerFindOneResponses,
 	WebcamsControllerListData,
-	WebcamsControllerListResponses
+	WebcamsControllerListResponses,
+	WebcamsControllerListSourcesData,
+	WebcamsControllerListSourcesResponses
 } from './types.gen.js';
 
 export type Options<
@@ -54,6 +56,14 @@ export const webcamsControllerList = <ThrowOnError extends boolean = false>(
 ): RequestResult<WebcamsControllerListResponses, unknown, ThrowOnError> =>
 	(options?.client ?? client).get<WebcamsControllerListResponses, unknown, ThrowOnError>({
 		url: '/api/webcams',
+		...options
+	});
+
+export const webcamsControllerListSources = <ThrowOnError extends boolean = false>(
+	options?: Options<WebcamsControllerListSourcesData, ThrowOnError>
+): RequestResult<WebcamsControllerListSourcesResponses, unknown, ThrowOnError> =>
+	(options?.client ?? client).get<WebcamsControllerListSourcesResponses, unknown, ThrowOnError>({
+		url: '/api/webcams/sources',
 		...options
 	});
 

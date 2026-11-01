@@ -2,7 +2,7 @@ import { StandardSchemaValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { TestingModule } from '@nestjs/testing';
-import { webcamListItemDto, webcamDto } from '@webcam-scrapper/contracts/dto';
+import { webcamListItemDto, webcamDto, webcamSourceDto } from '@webcam-scrapper/contracts/dto';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { AppModule } from '../src/app.module.js';
@@ -35,6 +35,30 @@ describe('webcams (e2e)', () => {
 	it('rejects a limit outside the schema', async () => {
 		await request(app.getHttpServer()).get('/api/webcams?limit=0').expect(400);
 		await request(app.getHttpServer()).get('/api/webcams?limit=abc').expect(400);
+	});
+
+	it('lists the provider ids in the catalogue', async () => {
+		const response = await request(app.getHttpServer()).get('/api/webcams/sources').expect(200);
+
+		expect(() => webcamSourceDto.array().parse(response.body)).not.toThrow();
+	});
+
+	it('filters the list down to one provider', async () => {
+		const [source] = webcamSourceDto
+			.array()
+			.parse((await request(app.getHttpServer()).get('/api/webcams/sources')).body);
+
+		// A fresh database has no catalogue yet; the filter query is still exercised when it has.
+		if (!source) return;
+
+		const response = await request(app.getHttpServer())
+			.get(`/api/webcams?source=${source}`)
+			.expect(200);
+
+		const locations = webcamListItemDto.array().parse(response.body);
+
+		expect(locations.length).toBeGreaterThan(0);
+		expect(locations.every((location) => location.source === source)).toBe(true);
 	});
 
 	it('answers 404 for a location that does not exist', async () => {

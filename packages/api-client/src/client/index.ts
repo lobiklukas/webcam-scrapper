@@ -6,7 +6,8 @@ export {
 	healthControllerCheck,
 	type Options,
 	webcamsControllerFindOne,
-	webcamsControllerList
+	webcamsControllerList,
+	webcamsControllerListSources
 } from './sdk.gen.js';
 export type {
 	ClientOptions,
@@ -25,5 +26,8 @@ export type {
 	WebcamsControllerFindOneResponses,
 	WebcamsControllerListData,
 	WebcamsControllerListResponse,
-	WebcamsControllerListResponses
+	WebcamsControllerListResponses,
+	WebcamsControllerListSourcesData,
+	WebcamsControllerListSourcesResponse,
+	WebcamsControllerListSourcesResponses
 } from './types.gen.js';

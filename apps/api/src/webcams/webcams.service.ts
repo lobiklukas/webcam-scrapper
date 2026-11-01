@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { asc, count, desc, eq, ilike, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, inArray } from 'drizzle-orm';
 import { cam, frame, location } from '@webcam-scrapper/db';
 import {
 	framePath,
@@ -25,10 +25,13 @@ export class WebcamsService {
 	 * not been polled yet still gets a preview from a sibling; with no frames at all it falls back to
 	 * its first camera and `frame: null`.
 	 */
-	async list({ q, limit, offset }: ListWebcamsQuery): Promise<WebcamListItemDto[]> {
+	async list({ q, source, limit, offset }: ListWebcamsQuery): Promise<WebcamListItemDto[]> {
 		const rows = await this.db.query.location.findMany({
 			columns: { id: true, source: true, originalId: true, name: true, long: true, lat: true },
-			where: q ? ilike(location.name, `%${escapeLike(q)}%`) : undefined,
+			where: and(
+				q ? ilike(location.name, `%${escapeLike(q)}%`) : undefined,
+				source ? eq(location.source, source) : undefined
+			),
 			orderBy: [asc(location.name), asc(location.id)],
 			limit,
 			offset,
@@ -49,13 +52,13 @@ export class WebcamsService {
 
 		const camCounts = await this.countCams(rows.map(({ id }) => id));
 
-		return rows.map(({ cam: cams, id, source, originalId, name, long, lat }) => {
+		return rows.map(({ cam: cams, id, source: provider, originalId, name, long, lat }) => {
 			const selected = cams.find(({ frame: frames }) => frames.length > 0) ?? cams[0];
 			const [latest] = selected?.frame ?? [];
 
 			return {
 				id,
-				source,
+				source: provider,
 				originalId,
 				name,
 				long,
@@ -100,6 +103,16 @@ export class WebcamsService {
 		const { cam: cams, ...row } = locationRow;
 
 		return { ...row, camCount: cams.length, cams };
+	}
+
+	/** Every provider id present in the catalogue, ordered, for the provider filter. */
+	async listSources(): Promise<string[]> {
+		const rows = await this.db
+			.selectDistinct({ source: location.source })
+			.from(location)
+			.orderBy(asc(location.source));
+
+		return rows.map(({ source }) => source);
 	}
 
 	private async countCams(locationIds: number[]): Promise<Map<number, number>> {
