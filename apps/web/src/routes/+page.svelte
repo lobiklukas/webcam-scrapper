@@ -1,2 +1,6 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<div class="grid grid-flow-row grid-cols-3 gap-4">
+	{#each Array(20) as item}
+		<!-- content here -->
+		<div class="aspect-video w-full rounded-xl bg-muted"></div>
+	{/each}
+</div>
