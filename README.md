@@ -7,7 +7,7 @@ Monorepo for a webcam map with a management UI. The research that drives the pro
 
 ```
 apps/
-  web/    SvelteKit 3 app: map, player, camera management UI (runs on Bun via adapter-bun)
+  web/    SvelteKit 3 app: map, player, camera management UI (adapter-node)
   api/    Nest 12 app: camera registry, read API, ingestion (health + config + Swagger today)
 packages/ reserve for code shared by both apps (workspace glob already wired)
 docs/
@@ -16,12 +16,11 @@ docs/
 
 ## Prerequisites
 
-| Tool   | Version                         | Why                                                                                  |
-| ------ | ------------------------------- | ------------------------------------------------------------------------------------ |
-| Node   | >= 24                           | both apps                                                                            |
-| pnpm   | 12.x (`packageManager` pins it) | installs and runs the workspace                                                      |
-| Bun    | >= 1.3                          | **runtime for `apps/web`** — `@sveltejs/adapter-bun` refuses to build/run under Node |
-| Docker | any                             | local Postgres (`apps/web/compose.yaml`)                                             |
+| Tool   | Version                         | Why                                      |
+| ------ | ------------------------------- | ---------------------------------------- |
+| Node   | >= 24                           | both apps                                |
+| pnpm   | 12.x (`packageManager` pins it) | installs and runs the workspace          |
+| Docker | any                             | local Postgres (`apps/web/compose.yaml`) |
 
 ## Commands
 
@@ -38,8 +37,19 @@ pnpm fmt            # oxfmt --write
 pnpm fmt:check      # oxfmt --check (CI gate)
 pnpm check          # turbo: svelte-check + tsc --noEmit
 pnpm test           # turbo: vitest in both apps
-pnpm build          # turbo: nest build + vite build (via bun)
+pnpm build          # turbo: nest build + vite build (adapter-node)
 ```
+
+Running the web app's production build (`@sveltejs/adapter-node`):
+
+```sh
+pnpm --filter @windy/web build
+pnpm --filter @windy/web start   # node --env-file-if-exists=.env build
+```
+
+`start` listens on `PORT` from `apps/web/.env` (5173 — the API owns 3000). `DATABASE_URL`, `ORIGIN`
+and `BETTER_AUTH_SECRET` must be in the environment: SvelteKit validates them at boot, so a missing
+value fails at startup instead of on the first request.
 
 Database (owned by `apps/web`):
 
@@ -50,8 +60,8 @@ pnpm db:push        # apply schema
 pnpm db:studio      # drizzle studio
 ```
 
-The web app validates its environment at build time, so `apps/web/.env` must exist — copy
-`apps/web/.env.example`.
+The web app validates its environment at build time **and** at boot, so `apps/web/.env` must exist —
+copy `apps/web/.env.example`.
 
 ## Tooling decisions
 

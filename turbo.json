@@ -6,7 +6,7 @@
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
-			"outputs": ["dist/**", "build/**", ".svelte-kit/output/**", ".svelte-kit/cloudflare/**"]
+			"outputs": ["dist/**", "build/**", ".svelte-kit/output/**"]
 		},
 		"check": {
 			"dependsOn": ["^check"],

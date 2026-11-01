@@ -16,7 +16,6 @@
 		"**/.svelte-kit/**",
 		"**/.turbo/**",
 		"**/coverage/**",
-		"bun.lock",
 		"docs/research/**"
 	],
 	"overrides": [

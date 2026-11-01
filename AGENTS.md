@@ -20,17 +20,20 @@ pnpm lint        # oxlint + type-aware oxlint over apps/api
 pnpm fmt         # oxfmt --write          (pnpm fmt:check for CI)
 pnpm check       # svelte-check + tsc --noEmit via turbo
 pnpm test        # vitest in both apps
-pnpm build       # nest build + vite build (via bun)
+pnpm build       # nest build + vite build (adapter-node)
 ```
 
-Never add `eslint`, `prettier`, `bun install`, or `npm install` instructions: linting/formatting is
+Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/formatting is
 **oxlint + oxfmt** and the package manager is **pnpm 12**.
 
 ## Non-obvious constraints
 
-- **`apps/web` builds and runs under Bun, not Node.** `@sveltejs/adapter-bun` errors with
-  `adapter-bun requires running the SvelteKit build with Bun` otherwise. That is why `build` is
-  `bun --bun vite build` and `start` is `bun ./build/index.js`. Install is still pnpm.
+- **`apps/web` targets Node** via `@sveltejs/adapter-node`: `build` is `vite build`, `start` is
+  `node --env-file-if-exists=.env build` (the env file is what supplies `PORT`, `ORIGIN`,
+  `DATABASE_URL`, `BETTER_AUTH_SECRET` in production). Do not reintroduce `bun --bun` or an
+  adapter that needs another runtime.
+- **The web app owns port 5173, the API owns 3000.** `adapter-node` defaults to 3000, hence the
+  `PORT` in `apps/web/.env`; keep that in mind before adding any other server.
 - **Lint/format are repo-level, not per-package.** `oxlint` and `oxfmt` run once over the tree from
   the root; do not add per-app `lint` scripts or Turbo tasks for them.
 - **Config locations:** `.oxlintrc.json` (root, shared) extended by `apps/web/.oxlintrc.json` and
