@@ -1,26 +1,36 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { createInfiniteQuery } from '@tanstack/svelte-query';
 	import type { WebcamsControllerListResponse } from '@webcam-scrapper/api-client';
 	import { webcamsControllerListInfiniteOptions } from '@webcam-scrapper/api-client/svelte-query';
 	import { infiniteScroll } from '#lib/actions/infinite-scroll.js';
 	import { Skeleton } from '#lib/components/ui/skeleton/index.js';
+	import { WEBCAM_PAGE_SIZE, nextWebcamOffset } from '#lib/webcams.js';
+	import type { PageData } from './$types';
 
-	/** Cards per request; also the page size `getNextPageParam` uses to detect the last page. */
-	const PAGE_SIZE = 24;
+	let { data }: { data: PageData } = $props();
 
 	/**
-	 * The generated helper turns `pageParam` into `?offset=`, so all this adds is when to stop:
-	 * a page shorter than PAGE_SIZE means the catalogue is exhausted.
-	 * Queries are browser-only (see `src/lib/query-client.ts`), so the first page arrives after
-	 * hydration.
+	 * Page 0 already came from `+page.ts` on the server, so it is seeded as `initialData`: the first
+	 * paint has real tiles and the browser does not refetch it until it goes stale.
+	 * Further pages are fetched in the browser only (see `src/lib/query-client.ts`).
+	 *
+	 * `untrack` on purpose: this is a one-off snapshot. If `data` changes later (client-side
+	 * navigation back to `/`), the query must not be rebuilt underneath the user.
 	 */
+	const serverPage = untrack(() => ({
+		pages: [data.webcams],
+		pageParams: [0],
+		loadedAt: data.loadedAt
+	}));
+
 	const query = createInfiniteQuery({
-		...webcamsControllerListInfiniteOptions({ query: { limit: PAGE_SIZE } }),
+		...webcamsControllerListInfiniteOptions({ query: { limit: WEBCAM_PAGE_SIZE } }),
 		initialPageParam: 0,
-		getNextPageParam: (lastPage, _pages, lastOffset) => {
-			if (lastPage.length < PAGE_SIZE) return undefined;
-			return (typeof lastOffset === 'number' ? lastOffset : 0) + PAGE_SIZE;
-		}
+		getNextPageParam: (lastPage, _pages, lastOffset) =>
+			nextWebcamOffset(lastPage.length, lastOffset),
+		initialData: { pages: serverPage.pages, pageParams: serverPage.pageParams },
+		initialDataUpdatedAt: serverPage.loadedAt
 	});
 
 	type Webcam = WebcamsControllerListResponse[number];

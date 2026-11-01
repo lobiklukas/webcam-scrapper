@@ -20,7 +20,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.session = snapshot.session;
 	}
 
-	const response = await resolve(event);
+	const response = await resolve(event, {
+		// Load functions read `Response` objects they fetched through SvelteKit (the generated API
+		// client inspects `content-type` and `content-length`); by default none of those headers are
+		// serialized for SSR.
+		filterSerializedResponseHeaders: (name) => name === 'content-type' || name === 'content-length'
+	});
 	if (setCookies.length === 0) return response;
 
 	// better-auth rolls the session expiry; pass the refreshed cookie to the browser.

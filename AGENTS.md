@@ -99,10 +99,16 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
   `@webcam-scrapper/contracts/dto`. Do not add `class-validator`/`class-transformer` decorators or a
   second validation pipe.
 - The web app talks to the API through the generated client (`@webcam-scrapper/api-client`) inside
-  TanStack Query; server-side `load` functions keep using `event.fetch` on the `/api/*` proxy.
+  TanStack Query. In a `load` it works too, but then `baseUrl` must be absolute (`url.origin`) because
+  the client builds a `Request` and Node rejects relative URLs there — and `hooks.server.ts` has to
+  keep passing `filterSerializedResponseHeaders` for `content-type`/`content-length`, or every header
+  read on that response throws during SSR.
 - API: feature folders (`src/<feature>/<feature>.{module,controller,service}.ts`), config through
   `ConfigService` typed by `src/config/configuration.ts` — the only place that reads `process.env`.
 - Web: Svelte 5 runes, routes under `src/routes`, server-only code under `src/lib/server`.
+- Server render the first page, then hand it to the query as `initialData` (see `routes/+page.ts` and
+  `routes/+page.svelte`): the HTML has real content, the client does not refetch page 0, and further
+  pages come from the browser only (queries are `enabled: browser`, the client has no absolute URL).
 - Auth in the web app is a form action posting to the `/api/*` proxy with `event.fetch`, then a
   redirect; the session itself always comes from `locals`, never from client-side state.
 - Tests are Vitest in both apps. `apps/web` component tests run in a real browser
