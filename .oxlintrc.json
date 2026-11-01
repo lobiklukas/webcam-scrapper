@@ -36,6 +36,7 @@
 		"**/.turbo/**",
 		"**/coverage/**",
 		"**/drizzle/**",
-		"docs/research/data/**"
+		"docs/research/data/**",
+		"packages/api-client/src/client/**"
 	]
 }

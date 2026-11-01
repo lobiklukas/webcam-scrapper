@@ -18,6 +18,10 @@
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
+	"dependencies": {
+		"@tanstack/svelte-query": "catalog:",
+		"@webcam-scrapper/api-client": "workspace:*"
+	},
 	"devDependencies": {
 		"@fontsource-variable/geist": "^5.3.0",
 		"@fontsource-variable/roboto": "^5.3.0",

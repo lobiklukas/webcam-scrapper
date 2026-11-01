@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** Liveness payload; also the Swagger response schema. */
+/** Liveness payload of `GET /health`; also the Swagger response schema. */
 export const healthDto = z.object({
 	status: z.literal('ok'),
 	uptime: z.number().int().nonnegative(),

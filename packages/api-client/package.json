@@ -1,0 +1,23 @@
+{
+	"name": "@webcam-scrapper/api-client",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/client/index.ts",
+		"./client": "./src/client/client.gen.ts",
+		"./svelte-query": "./src/client/@tanstack/svelte-query.gen.ts"
+	},
+	"scripts": {
+		"gen": "openapi-ts",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@tanstack/svelte-query": "catalog:"
+	},
+	"devDependencies": {
+		"@hey-api/openapi-ts": "0.99.0",
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	}
+}

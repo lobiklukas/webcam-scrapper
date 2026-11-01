@@ -5,14 +5,15 @@ Nest API. Read this before changing anything.
 
 ## Repo map
 
-| Path                 | What it is                                                                      |
-| -------------------- | ------------------------------------------------------------------------------- |
-| `apps/web`           | SvelteKit 3 app (Svelte 5, Tailwind 4, adapter-node). No DB, no auth of its own |
-| `apps/api`           | Nest 12 app (health, config, Swagger, better-auth, drizzle client, Postgres)    |
-| `packages/db`        | drizzle schema (incl. generated better-auth tables), client factory, migrations |
-| `packages/contracts` | reserved: DTOs, socket events, job payloads                                     |
-| `scripts`            | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts into Postgres   |
-| `docs/research`      | Product research: Windy teardown, camera sources, management flows, ingestion   |
+| Path                  | What it is                                                                      |
+| --------------------- | ------------------------------------------------------------------------------- |
+| `apps/web`            | SvelteKit 3 app (Svelte 5, Tailwind 4, adapter-node). No DB, no auth of its own |
+| `apps/api`            | Nest 12 app (health, config, Swagger, better-auth, drizzle client, Postgres)    |
+| `packages/db`         | drizzle schema (incl. generated better-auth tables), client factory, migrations |
+| `packages/contracts`  | zod DTOs shared by api and web + the generated `openapi.json`                   |
+| `packages/api-client` | generated fetch client, SDK and TanStack Query options for the web app          |
+| `scripts`             | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts into Postgres   |
+| `docs/research`       | Product research: Windy teardown, camera sources, management flows, ingestion   |
 
 ## Commands (always from the repo root)
 
@@ -27,6 +28,7 @@ pnpm db:start    # docker compose up (Postgres 5432, root compose.yaml)
 pnpm db:push     # apply packages/db schema (db:generate / db:migrate for SQL)
 pnpm auth:schema # regenerate packages/db/src/schema/auth.ts, then run pnpm fmt
 pnpm seed        # upsert the Digitraffic catalogue into location/cam (needs DATABASE_URL)
+pnpm gen:api     # export openapi.json from apps/api, then regenerate packages/api-client
 ```
 
 Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/formatting is
@@ -76,6 +78,15 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
   why `seed` is a Turbo task with `dependsOn: ["^build"]` rather than a plain pnpm script, and why
   `DATABASE_URL` sits in its `passThroughEnv`: `DATABASE_URL=… pnpm seed` overrides the
   `packages/db/.env` the script loads by default.
+- **`packages/api-client` is generated, never edited.** `pnpm gen:api` builds `apps/api`, boots it
+  headlessly to write `packages/contracts/openapi.json`, then runs `@hey-api/openapi-ts`. The output
+  under `src/client/` is committed so builds and tests need no running API; `oxlint` ignores it.
+  The generator runs the _compiled_ API (`node dist/tools/generate-openapi.js`), because Nest's DI
+  needs the decorator metadata only `tsc` emits — `tsx` would boot without it.
+- **DTOs live in `packages/contracts`, not in `apps/api`.** One zod object is the type (`z.infer`),
+  the runtime validator (`@Query`/`@Param`/`@Body` take `{ schema }`, the global
+  `StandardSchemaValidationPipe` runs it) and the Swagger schema (`@ApiOkResponse({ standardSchema })`),
+  which is what ends up in the generated client.
 - **e2e specs do not run `main.ts`.** `Test.createTestingModule` + `createNestApplication` skips the
   global pipe, CORS and Swagger setup, so a spec that asserts a 400 has to install
   `new StandardSchemaValidationPipe()` itself (see `test/webcams.e2e-spec.ts`).
@@ -84,11 +95,11 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
 
 - TypeScript everywhere, ESM only (`"type": "module"`, `nodenext` resolution). Import local files
   with the `.js` extension in `apps/api` (Node ESM).
-- API DTOs are **zod** schemas in `src/<feature>/<feature>.dto.ts`: one object is the type
-  (`z.infer`), the runtime validator (`@Query`/`@Param`/`@Body` take `{ schema }` and the global
-  `StandardSchemaValidationPipe` runs it) and the Swagger schema
-  (`@ApiOkResponse({ standardSchema })`, converted by `@nestjs/swagger`). Do not add
-  `class-validator`/`class-transformer` decorators or a second validation pipe.
+- API DTOs are **zod** schemas in `packages/contracts/src/dto/`, imported as
+  `@webcam-scrapper/contracts/dto`. Do not add `class-validator`/`class-transformer` decorators or a
+  second validation pipe.
+- The web app talks to the API through the generated client (`@webcam-scrapper/api-client`) inside
+  TanStack Query; server-side `load` functions keep using `event.fetch` on the `/api/*` proxy.
 - API: feature folders (`src/<feature>/<feature>.{module,controller,service}.ts`), config through
   `ConfigService` typed by `src/config/configuration.ts` — the only place that reads `process.env`.
 - Web: Svelte 5 runes, routes under `src/routes`, server-only code under `src/lib/server`.

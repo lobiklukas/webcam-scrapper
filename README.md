@@ -10,7 +10,10 @@ apps/
   web/    SvelteKit 3 app: map, player, camera management UI (adapter-node)
   api/    Nest 12 app: camera registry, read API, ingestion, auth + Postgres (health + config + Swagger today)
 packages/
-  db/     drizzle schema (incl. the generated better-auth tables), client factory, migrations
+  db/          drizzle schema (incl. the generated better-auth tables), client factory, migrations
+  contracts/   zod DTOs for the REST surface, plus the generated openapi.json
+  api-client/  generated fetch client + TanStack Query options for the web app
+scripts/       one-off tooling (seed: Digitraffic → Postgres)
 docs/
   research/  Windy teardown, camera sources, management flows, ingestion strategy
 ```
@@ -42,7 +45,13 @@ pnpm fmt:check      # oxfmt --check (CI gate)
 pnpm check          # turbo: svelte-check + tsc --noEmit
 pnpm test           # turbo: vitest in both apps
 pnpm build          # turbo: nest build + vite build (adapter-node)
+
+pnpm gen:api        # re-export openapi.json and regenerate packages/api-client
+pnpm seed           # upsert the Digitraffic catalogue into Postgres
 ```
+
+`packages/api-client` is generated, not hand-written: change a controller or a DTO in
+`packages/contracts`, then run `pnpm gen:api` and commit the result.
 
 Running the web app's production build (`@sveltejs/adapter-node`):
 

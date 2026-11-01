@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
-import { healthDto, type HealthDto } from './health.dto.js';
+import { healthDto, type HealthDto } from '@webcam-scrapper/contracts/dto';
 
 @ApiTags('health')
 @AllowAnonymous()

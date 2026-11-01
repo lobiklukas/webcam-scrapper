@@ -16,6 +16,7 @@ allowBuilds:
 # apps cannot drift onto different TypeScript / Vitest / oxc versions.
 catalog:
   '@rsvelte/oxlint-plugin': ^0.2.6
+  '@tanstack/svelte-query': ^5.90.2
   '@types/node': ^24.10.1
   '@vitest/coverage-v8': ^4.1.8
   oxfmt: ^0.75.0

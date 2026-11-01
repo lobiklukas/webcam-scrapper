@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import type { TestingModule } from '@nestjs/testing';
 import { WebcamsController } from './webcams.controller.js';
 import { WebcamsService } from './webcams.service.js';
-import type { ListWebcamsQuery, WebcamDto, WebcamSummaryDto } from './webcams.dto.js';
+import type { ListWebcamsQuery, WebcamDto, WebcamSummaryDto } from '@webcam-scrapper/contracts/dto';
 
 const summary: WebcamSummaryDto = {
 	id: 1,

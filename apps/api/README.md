@@ -10,6 +10,8 @@ repo described in [`../../README.md`](../../README.md) — run commands from the
   proxy of `apps/web`)
 - `* /api/auth/**` — better-auth endpoints (sign-up, sign-in, sign-out, get-session, …)
 - `GET /docs` — Swagger UI (skipped when `NODE_ENV=production`), `GET /docs-json` — OpenAPI document
+- `pnpm gen:openapi` — writes `packages/contracts/openapi.json` (the input of `packages/api-client`;
+  the repo-level `pnpm gen:api` also regenerates the client)
 - Config: `src/config/configuration.ts` is the only reader of `process.env`; values are read through
   the typed `ConfigService`. Copy `.env.example` to `.env` and fill `DATABASE_URL`,
   `BETTER_AUTH_SECRET` (32+ characters), `API_ORIGIN`, `WEB_ORIGIN`, `PORT`.
@@ -40,15 +42,21 @@ src/
   auth/                createAuth(): the better-auth instance
   config/              typed env mapping
   db/db.ts             `DB` injection token + `AppDatabase` type
-  health/              health.module/controller/dto + unit spec
-  webcams/             webcams.module/controller/service/dto + unit spec (public read API)
+  health/              health.module/controller + unit spec
+  webcams/             webcams.module/controller/service + unit spec (public read API)
+  openapi.ts           createOpenApiDocument(): served at /docs and exported by tools/generate-openapi.ts
+  tools/               generate-openapi.ts: writes packages/contracts/openapi.json
   main.ts              bootstrap: bodyParser off, CORS, global StandardSchemaValidationPipe, Swagger, shutdown hooks
 test/                  e2e specs (supertest) + env defaults for them
 ```
 
 Feature modules follow `src/<feature>/<feature>.{module,controller,service}.ts`. Anything touching the
-database belongs behind a service. DTOs are **zod** schemas in `<feature>.dto.ts`: each schema is
-also the type (`z.infer`), the Swagger response (`@ApiOkResponse({ standardSchema })`) and the
-runtime validator, because `@Query`/`@Param`/`@Body` take `{ schema }` and the global
-`StandardSchemaValidationPipe` validates whatever schema the parameter carries. No `class-validator`
-decorators, no `@ApiProperty` duplication — `@nestjs/swagger` converts the zod schema itself.
+database belongs behind a service.
+
+DTOs are **zod** schemas in `packages/contracts/src/dto/` (imported as
+`@webcam-scrapper/contracts/dto`): each schema is also the type (`z.infer`), the Swagger response
+(`@ApiOkResponse({ standardSchema })`) and the runtime validator, because `@Query`/`@Param`/`@Body`
+take `{ schema }` and the global `StandardSchemaValidationPipe` validates whatever schema the
+parameter carries. No `class-validator` decorators, no `@ApiProperty` duplication —
+`@nestjs/swagger` converts the zod schema itself, and `packages/api-client` is generated from the
+result.

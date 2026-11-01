@@ -1,0 +1,14 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		// Browser-only package: generated files import each other with `.js` specifiers (Node ESM
+		// style), which `nodenext` and Vite both map back to the `.ts` sources. Nothing is emitted —
+		// the web app bundles this package from source.
+		"noEmit": true,
+		"declaration": false,
+		"sourceMap": false,
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"types": ["node"]
+	},
+	"include": ["src", "openapi-ts.config.ts"]
+}

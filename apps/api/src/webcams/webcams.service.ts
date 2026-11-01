@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { asc, count, eq, ilike } from 'drizzle-orm';
 import { cam, location } from '@webcam-scrapper/db';
+import type { ListWebcamsQuery, WebcamDto, WebcamSummaryDto } from '@webcam-scrapper/contracts/dto';
 import { DB, type AppDatabase } from '../db/db.js';
-import type { ListWebcamsQuery, WebcamDto, WebcamSummaryDto } from './webcams.dto.js';
 
 /** Escapes LIKE wildcards so searching for `50%` looks for a literal `50%`. */
 function escapeLike(value: string): string {

@@ -18,5 +18,13 @@ This app has **no database and no auth code**. The Nest API owns both; this app 
   the API returns.
 - `/demo/auth` is the login / sign-up / sign-out example; it uses exactly those two mechanisms.
 
+Client-side data comes from the generated client in `@webcam-scrapper/api-client` (fetch client + SDK
+
+- TanStack Query options, rebuilt with `pnpm gen:api`). `src/routes/+layout.svelte` wraps the app in a
+  `QueryClientProvider` built by `src/lib/query-client.ts`; queries are disabled during SSR, so server
+  data still belongs in `load` functions using `event.fetch`. Because the client uses a relative base
+  URL and every generated path starts with `/api`, requests land on the proxy above — no `API_URL` in
+  client code.
+
 Env (`.env`, copy `.env.example`): `PORT`, `API_URL` (base URL of the API, e.g.
 `http://localhost:3000`), `ORIGIN`.

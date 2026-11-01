@@ -16,7 +16,8 @@
 		"**/.svelte-kit/**",
 		"**/.turbo/**",
 		"**/coverage/**",
-		"docs/research/**"
+		"docs/research/**",
+		"packages/contracts/openapi.json"
 	],
 	"overrides": [
 		{

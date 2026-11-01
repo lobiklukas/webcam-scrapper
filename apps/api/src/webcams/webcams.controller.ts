@@ -9,7 +9,7 @@ import {
 	type ListWebcamsQuery,
 	type WebcamDto,
 	type WebcamSummaryDto
-} from './webcams.dto.js';
+} from '@webcam-scrapper/contracts/dto';
 // Value import: `emitDecoratorMetadata` needs the class at runtime for constructor injection.
 // oxlint-disable-next-line typescript/consistent-type-imports
 import { WebcamsService } from './webcams.service.js';

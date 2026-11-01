@@ -2,6 +2,7 @@ import { StandardSchemaValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { TestingModule } from '@nestjs/testing';
+import { webcamDto, webcamSummaryDto } from '@webcam-scrapper/contracts/dto';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { AppModule } from '../src/app.module.js';
@@ -27,12 +28,8 @@ describe('webcams (e2e)', () => {
 	it('lists locations anonymously', async () => {
 		const response = await request(app.getHttpServer()).get('/api/webcams').expect(200);
 
-		expect(Array.isArray(response.body)).toBe(true);
-		for (const item of response.body) {
-			expect(typeof item.id).toBe('number');
-			expect(typeof item.name).toBe('string');
-			expect(typeof item.camCount).toBe('number');
-		}
+		// The same DTO the controller documents, so response drift fails here too.
+		expect(() => webcamSummaryDto.array().parse(response.body)).not.toThrow();
 	});
 
 	it('rejects a limit outside the schema', async () => {
@@ -46,14 +43,15 @@ describe('webcams (e2e)', () => {
 
 	it('returns a location with its cameras', async () => {
 		const list = await request(app.getHttpServer()).get('/api/webcams?limit=1').expect(200);
-		const [first] = list.body as { id: number; camCount: number }[];
+		const [first] = webcamSummaryDto.array().parse(list.body);
 
 		// A fresh database has no catalogue yet; the detail shape is covered by the unit spec.
 		if (!first) return;
 
-		const detail = await request(app.getHttpServer()).get(`/api/webcams/${first.id}`).expect(200);
+		const response = await request(app.getHttpServer()).get(`/api/webcams/${first.id}`).expect(200);
+		const detail = webcamDto.parse(response.body);
 
-		expect(detail.body).toMatchObject({ id: first.id });
-		expect(detail.body.cams).toHaveLength(first.camCount);
+		expect(detail.id).toBe(first.id);
+		expect(detail.cams).toHaveLength(first.camCount);
 	});
 });
