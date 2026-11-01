@@ -13,8 +13,10 @@ endpoint; the raw output is in [`data/probe-log.tsv`](data/probe-log.tsv).
 | [`03-camera-management.md`](03-camera-management.md) | you build the admin screens where a user adds and maintains a camera |
 | [`04-ingestion-strategy.md`](04-ingestion-strategy.md) | you build the poller, adapters, dedupe, retention or the deferred image pipeline |
 | [`data/sources.json`](data/sources.json) | machine-readable registry of the verified sources |
+| [`data/scraper-sources.json`](data/scraper-sources.json) | you are writing a scraper: one flat entry per source, nothing else |
 | [`data/url-patterns.json`](data/url-patterns.json) | URL templates to try when a user pastes a camera URL or a camera page |
 | [`data/probe-log.tsv`](data/probe-log.tsv) | you want the evidence: status, content type, bytes, seconds per URL |
+| [`../camera-model.schema.json`](../camera-model.schema.json) | you are writing the Drizzle tables: JSON Schema for source, camera, image source, frame, poll attempt, import run and the probe report |
 
 ## Short version
 

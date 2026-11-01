@@ -5,6 +5,9 @@ repo described in [`../../README.md`](../../README.md) — run commands from the
 
 - `pnpm dev --filter @webcam-scrapper/api` — watch mode on <http://localhost:3000>
 - `GET /health` — liveness payload (`@AllowAnonymous()`; every other route needs a session)
+- `GET /api/webcams?q=&limit=&offset=` — locations with their camera count, `GET /api/webcams/:id`
+  — one location with its cameras (`@AllowAnonymous()`; public read data, reached through the `/api/*`
+  proxy of `apps/web`)
 - `* /api/auth/**` — better-auth endpoints (sign-up, sign-in, sign-out, get-session, …)
 - `GET /docs` — Swagger UI (skipped when `NODE_ENV=production`), `GET /docs-json` — OpenAPI document
 - Config: `src/config/configuration.ts` is the only reader of `process.env`; values are read through
@@ -38,10 +41,14 @@ src/
   config/              typed env mapping
   db/db.ts             `DB` injection token + `AppDatabase` type
   health/              health.module/controller/dto + unit spec
-  main.ts              bootstrap: bodyParser off, CORS, global ValidationPipe, Swagger, shutdown hooks
+  webcams/             webcams.module/controller/service/dto + unit spec (public read API)
+  main.ts              bootstrap: bodyParser off, CORS, global StandardSchemaValidationPipe, Swagger, shutdown hooks
 test/                  e2e specs (supertest) + env defaults for them
 ```
 
 Feature modules follow `src/<feature>/<feature>.{module,controller,service}.ts`. Anything touching the
-database belongs behind a service, and DTOs are validated with `class-validator` — the global
-`ValidationPipe` runs with `whitelist` and `forbidNonWhitelisted`, so unknown payload keys are a 400.
+database belongs behind a service. DTOs are **zod** schemas in `<feature>.dto.ts`: each schema is
+also the type (`z.infer`), the Swagger response (`@ApiOkResponse({ standardSchema })`) and the
+runtime validator, because `@Query`/`@Param`/`@Body` take `{ schema }` and the global
+`StandardSchemaValidationPipe` validates whatever schema the parameter carries. No `class-validator`
+decorators, no `@ApiProperty` duplication — `@nestjs/swagger` converts the zod schema itself.

@@ -76,11 +76,19 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
   why `seed` is a Turbo task with `dependsOn: ["^build"]` rather than a plain pnpm script, and why
   `DATABASE_URL` sits in its `passThroughEnv`: `DATABASE_URL=… pnpm seed` overrides the
   `packages/db/.env` the script loads by default.
+- **e2e specs do not run `main.ts`.** `Test.createTestingModule` + `createNestApplication` skips the
+  global pipe, CORS and Swagger setup, so a spec that asserts a 400 has to install
+  `new StandardSchemaValidationPipe()` itself (see `test/webcams.e2e-spec.ts`).
 
 ## Conventions
 
 - TypeScript everywhere, ESM only (`"type": "module"`, `nodenext` resolution). Import local files
   with the `.js` extension in `apps/api` (Node ESM).
+- API DTOs are **zod** schemas in `src/<feature>/<feature>.dto.ts`: one object is the type
+  (`z.infer`), the runtime validator (`@Query`/`@Param`/`@Body` take `{ schema }` and the global
+  `StandardSchemaValidationPipe` runs it) and the Swagger schema
+  (`@ApiOkResponse({ standardSchema })`, converted by `@nestjs/swagger`). Do not add
+  `class-validator`/`class-transformer` decorators or a second validation pipe.
 - API: feature folders (`src/<feature>/<feature>.{module,controller,service}.ts`), config through
   `ConfigService` typed by `src/config/configuration.ts` — the only place that reads `process.env`.
 - Web: Svelte 5 runes, routes under `src/routes`, server-only code under `src/lib/server`.

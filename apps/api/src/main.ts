@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { StandardSchemaValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -12,9 +12,7 @@ async function bootstrap(): Promise<void> {
 	const config = app.get<ConfigService<AppConfig, true>>(ConfigService);
 
 	app.enableCors({ origin: config.get('webOrigin', { infer: true }), credentials: true });
-	app.useGlobalPipes(
-		new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true })
-	);
+	app.useGlobalPipes(new StandardSchemaValidationPipe());
 	app.enableShutdownHooks();
 
 	if (config.get('nodeEnv', { infer: true }) !== 'production') {

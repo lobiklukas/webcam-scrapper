@@ -1,12 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
 
-export class HealthDto {
-	@ApiProperty({ example: 'ok', enum: ['ok'] })
-	status!: 'ok';
+/** Liveness payload; also the Swagger response schema. */
+export const healthDto = z.object({
+	status: z.literal('ok'),
+	uptime: z.number().int().nonnegative(),
+	timestamp: z.iso.datetime()
+});
 
-	@ApiProperty({ example: 42, description: 'Process uptime in seconds.' })
-	uptime!: number;
-
-	@ApiProperty({ example: '2026-11-01T12:00:00.000Z', format: 'date-time' })
-	timestamp!: string;
-}
+export type HealthDto = z.infer<typeof healthDto>;

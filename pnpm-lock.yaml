@@ -197,6 +197,9 @@ catalogs:
     vitest:
       specifier: ^4.1.8
       version: 4.1.12
+    zod:
+      specifier: ^4.6.7
+      version: 4.6.7
 
 importers:
 
@@ -253,12 +256,6 @@ importers:
       better-auth:
         specifier: ^1.7.14
         version: 1.7.14(@sveltejs/kit@3.1.1(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.3)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)))(svelte@5.57.3)(typescript@6.0.3)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)))(drizzle-kit@0.31.11)(drizzle-orm@0.45.4(bun-types@1.4.4)(kysely@0.29.7)(postgres@3.4.9))(svelte@5.57.3)(vitest@4.1.12)
-      class-transformer:
-        specifier: ^0.5.1
-        version: 0.5.1
-      class-validator:
-        specifier: ^0.15.1
-        version: 0.15.1
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.4(bun-types@1.4.4)(kysely@0.29.7)(postgres@3.4.9)
@@ -268,6 +265,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
     devDependencies:
       '@nestjs/cli':
         specifier: ^12.0.11
@@ -5422,7 +5422,8 @@ snapshots:
       '@types/methods': 1.1.4
       '@types/superagent': 8.1.11
 
-  '@types/validator@13.15.10': {}
+  '@types/validator@13.15.10':
+    optional: true
 
   '@vitest/browser-playwright@4.1.12(playwright@1.64.1)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))(vitest@4.1.12)':
     dependencies:
@@ -5756,13 +5757,15 @@ snapshots:
     dependencies:
       readdirp: 5.1.1
 
-  class-transformer@0.5.1: {}
+  class-transformer@0.5.1:
+    optional: true
 
   class-validator@0.15.1:
     dependencies:
       '@types/validator': 13.15.10
       libphonenumber-js: 1.13.15
       validator: 13.15.35
+    optional: true
 
   cli-cursor@5.0.0:
     dependencies:
@@ -6259,7 +6262,8 @@ snapshots:
 
   kysely@0.29.7: {}
 
-  libphonenumber-js@1.13.15: {}
+  libphonenumber-js@1.13.15:
+    optional: true
 
   lightningcss-android-arm64@1.32.0:
     optional: true
@@ -7004,7 +7008,8 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  validator@13.15.35: {}
+  validator@13.15.35:
+    optional: true
 
   vary@1.1.2: {}
 

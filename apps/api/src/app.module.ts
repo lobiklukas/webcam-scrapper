@@ -7,6 +7,7 @@ import { createAuth } from './auth/auth.js';
 import configuration, { type AppConfig } from './config/configuration.js';
 import { DB, type AppDatabase } from './db/db.js';
 import { HealthModule } from './health/health.module.js';
+import { WebcamsModule } from './webcams/webcams.module.js';
 
 @Module({
 	imports: [
@@ -34,7 +35,8 @@ import { HealthModule } from './health/health.module.js';
 				})
 			})
 		}),
-		HealthModule
+		HealthModule,
+		WebcamsModule
 	]
 })
 export class AppModule {}

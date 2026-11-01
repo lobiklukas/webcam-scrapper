@@ -23,11 +23,10 @@
 		"@thallesp/nestjs-better-auth": "^2.8.0",
 		"@webcam-scrapper/db": "workspace:*",
 		"better-auth": "^1.7.14",
-		"class-transformer": "^0.5.1",
-		"class-validator": "^0.15.1",
 		"drizzle-orm": "^0.45.2",
 		"reflect-metadata": "^0.2.2",
-		"rxjs": "^7.8.1"
+		"rxjs": "^7.8.1",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@nestjs/cli": "^12.0.11",
