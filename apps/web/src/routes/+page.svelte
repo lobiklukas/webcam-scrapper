@@ -7,6 +7,7 @@
 	import { Skeleton } from '#lib/components/ui/skeleton/index.js';
 	import { WEBCAM_PAGE_SIZE, nextWebcamOffset } from '#lib/webcams.js';
 	import type { PageData } from './$types';
+	import Tile from '#lib/components/webcams/tile.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -70,7 +71,7 @@
 				TODO: render the rest. `webcam` is WebcamSummaryDto:
 				{ id, originalId, name, long, lat, camCount }
 			-->
-			<div class="aspect-video w-full rounded-xl bg-muted" title={webcam.name}></div>
+			<Tile name={webcam.name} />
 		{/each}
 
 		{#if $query.isFetchingNextPage}
