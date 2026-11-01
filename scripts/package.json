@@ -5,6 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"seed": "tsx --env-file-if-exists=../packages/db/.env seed.ts",
+		"test": "vitest run",
 		"check": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -14,6 +15,7 @@
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"tsx": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	}
 }

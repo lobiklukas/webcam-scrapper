@@ -1,94 +1,57 @@
 import { sql } from 'drizzle-orm';
-import { cam, createDb, location } from '@webcam-scrapper/db';
+import { cam, createDb, location, type Database } from '@webcam-scrapper/db';
+import { SOURCES, SOURCE_IDS } from './sources/index.ts';
+import type { Catalogue, SourceAdapter, SourceId } from './lib/types.ts';
 
-const STATIONS_URL = 'https://tie.digitraffic.fi/api/weathercam/v1/stations';
-const IMAGE_URL_PREFIX = 'https://weathercam.digitraffic.fi';
+/** Postgres has a parameter cap and the districts alone are thousands of rows. */
+const CHUNK_SIZE = 500;
 
-interface StationPreset {
-	id: string;
-	inCollection: boolean;
-}
+const key = (source: string, originalId: string): string => `${source}\u0000${originalId}`;
 
-interface StationFeature {
-	properties: {
-		id: string;
-		name: string;
-		presets?: StationPreset[];
-	};
-	geometry: {
-		/** `[lon, lat, height]`, WGS 84. */
-		coordinates: [number, number, number?];
-	} | null;
-}
-
-interface StationCollection {
-	features: StationFeature[];
-}
-
-async function fetchStations(): Promise<StationCollection> {
-	const response = await fetch(STATIONS_URL, {
-		headers: {
-			// Digitraffic answers 406 without gzip and asks clients to identify themselves.
-			'Accept-Encoding': 'gzip',
-			'Digitraffic-User': 'webcam-scrapper'
-		}
-	});
-
-	if (!response.ok) {
-		throw new Error(`GET ${STATIONS_URL} failed: ${response.status} ${response.statusText}`);
+function chunks<T>(rows: readonly T[]): T[][] {
+	const batches: T[][] = [];
+	for (let index = 0; index < rows.length; index += CHUNK_SIZE) {
+		batches.push(rows.slice(index, index + CHUNK_SIZE));
 	}
 
-	return (await response.json()) as StationCollection;
+	return batches;
 }
 
-function toLocationRow(station: StationFeature) {
-	const coordinates = station.geometry?.coordinates;
-	if (!coordinates) return [];
-	const [long, lat] = coordinates;
+/** `pnpm seed [--] <source>…` or `SEED_SOURCES=caltrans,tfl`; every source when neither is given. */
+function selectedSources(args: readonly string[]): SourceAdapter[] {
+	const requested =
+		args.length > 0
+			? args
+			: (process.env.SEED_SOURCES ?? '')
+					.split(/[\s,]+/)
+					.map((id) => id.trim())
+					.filter(Boolean);
 
-	return [
-		{
-			originalId: station.properties.id,
-			name: station.properties.name,
-			long,
-			lat
-		}
-	];
-}
+	if (requested.length === 0) return [...SOURCES];
 
-function toCamRows(station: StationFeature) {
-	return (station.properties.presets ?? []).map((preset) => ({
-		originalId: preset.id,
-		locationOriginalId: station.properties.id,
-		retrievalUrl: `${IMAGE_URL_PREFIX}/${preset.id}.jpg`,
-		inCollection: preset.inCollection
-	}));
-}
-
-/**
- * Downloads the Digitraffic weathercam catalogue and upserts it into `location` and `cam`.
- * Re-runnable: rows are matched on `original_id`, so existing ids are updated instead of duplicated.
- * Rows whose upstream camera disappeared are left alone.
- */
-export async function seed() {
-	const databaseUrl = process.env.DATABASE_URL;
-	if (!databaseUrl) {
-		throw new Error('DATABASE_URL is not set; export it or run `pnpm seed` from the repo root');
+	const unknown = requested.filter((id) => !SOURCE_IDS.includes(id as SourceId));
+	if (unknown.length > 0) {
+		throw new Error(
+			`Unknown source ${unknown.join(', ')}; known sources: ${SOURCE_IDS.join(', ')}`
+		);
 	}
 
-	const stations = (await fetchStations()).features;
-	const locationRows = stations.flatMap(toLocationRow);
-	const camRows = stations.flatMap(toCamRows);
+	return SOURCES.filter((source) => requested.includes(source.id));
+}
 
-	const { db, close } = createDb(databaseUrl);
+async function saveCatalogue(database: Database, { locations, cams }: Catalogue) {
+	const locationIds = new Map<string, number>();
 
-	try {
-		const counts = await db.transaction(async (tx) => {
-			const savedLocations = await tx
+	return database.transaction(async (tx) => {
+		let savedLocations = 0;
+
+		for (const batch of chunks(locations)) {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- one transaction, so the batches are serial
+			const saved = await tx
 				.insert(location)
-				.values(locationRows)
+				.values(batch)
 				.onConflictDoUpdate({
-					target: location.originalId,
+					target: [location.source, location.originalId],
 					set: {
 						name: sql`excluded.name`,
 						long: sql`excluded.long`,
@@ -96,43 +59,89 @@ export async function seed() {
 						updatedAt: sql`now()`
 					}
 				})
-				.returning({ id: location.id, originalId: location.originalId });
+				.returning({ id: location.id, source: location.source, originalId: location.originalId });
 
-			const locationIds = new Map(savedLocations.map((row) => [row.originalId, row.id]));
-			const rows = camRows.flatMap((row) => {
-				const locationId = locationIds.get(row.locationOriginalId);
-				if (locationId === undefined) return [];
-				const { locationOriginalId: _, ...values } = row;
-				return [
-					{
-						...values,
-						locationId,
-						nextPollAt: sql`now() + random() * interval '600 seconds'`
-					}
-				];
-			});
+			for (const row of saved) locationIds.set(key(row.source, row.originalId), row.id);
+			savedLocations += saved.length;
+		}
 
-			const savedCams = await tx
+		const rows = cams.flatMap((row) => {
+			const locationId = locationIds.get(key(row.source, row.locationOriginalId));
+			if (locationId === undefined) return [];
+
+			return [
+				{
+					source: row.source,
+					originalId: row.originalId,
+					locationId,
+					retrievalUrl: row.retrievalUrl,
+					inCollection: row.inCollection,
+					pollIntervalS: row.pollIntervalS,
+					nextPollAt: sql`now() + random() * interval '600 seconds'`
+				}
+			];
+		});
+
+		let savedCams = 0;
+
+		for (const batch of chunks(rows)) {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- one transaction, so the batches are serial
+			const saved = await tx
 				.insert(cam)
-				.values(rows)
+				.values(batch)
 				.onConflictDoUpdate({
-					target: cam.originalId,
+					target: [cam.source, cam.originalId],
 					set: {
 						locationId: sql`excluded.location_id`,
 						retrievalUrl: sql`excluded.retrieval_url`,
 						inCollection: sql`excluded.in_collection`,
+						pollIntervalS: sql`excluded.poll_interval_s`,
 						updatedAt: sql`now()`
 					}
 				})
 				.returning({ id: cam.id });
 
-			return { locations: savedLocations.length, cams: savedCams.length };
-		});
+			savedCams += saved.length;
+		}
 
-		console.log(`Seeded ${counts.locations} locations and ${counts.cams} cams`);
+		return { locations: savedLocations, cams: savedCams };
+	});
+}
+
+/**
+ * Reads the public camera catalogues and upserts them into `location` and `cam`. Re-runnable: rows
+ * are matched on `(source, original_id)`, so existing ids are updated instead of duplicated, and a
+ * camera that disappeared upstream is left alone. Each source is its own transaction, so one broken
+ * provider does not roll back the others; it does abort the run.
+ */
+export async function seed(args: readonly string[]) {
+	const databaseUrl = process.env.DATABASE_URL;
+	if (!databaseUrl) {
+		throw new Error('DATABASE_URL is not set; export it or run `pnpm seed` from the repo root');
+	}
+
+	const adapters = selectedSources(args);
+	const { db, close } = createDb(databaseUrl);
+	const totals = { locations: 0, cams: 0 };
+
+	try {
+		const saved = await Promise.all(
+			adapters.map(async (adapter) => ({
+				label: adapter.label,
+				counts: await saveCatalogue(db, await adapter.load())
+			}))
+		);
+
+		for (const { label, counts } of saved) {
+			totals.locations += counts.locations;
+			totals.cams += counts.cams;
+			console.log(`${label}: ${counts.locations} locations, ${counts.cams} cams`);
+		}
+
+		console.log(`Seeded ${totals.locations} locations and ${totals.cams} cams`);
 	} finally {
 		await close();
 	}
 }
 
-await seed();
+await seed(process.argv.slice(2));

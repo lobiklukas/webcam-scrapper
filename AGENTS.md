@@ -14,7 +14,7 @@ Nest API. Read this before changing anything.
 | `packages/db`          | drizzle schema (incl. generated better-auth tables), client factory, migrations                  |
 | `packages/contracts`   | zod DTOs shared by api and web + the generated `openapi.json`                                    |
 | `packages/api-client`  | generated fetch client, SDK and TanStack Query options for the web app                           |
-| `scripts`              | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts into Postgres                    |
+| `scripts`              | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts the camera catalogues            |
 | `docs/research`        | Product research: Windy teardown, camera sources, management flows, ingestion                    |
 
 ## Commands (always from the repo root)
@@ -24,14 +24,14 @@ pnpm dev         # turbo: web :5173, api :3000, and the scrape worker (hot reloa
 pnpm lint        # oxlint + type-aware oxlint over apps/api and apps/worker
 pnpm fmt         # oxfmt --write          (pnpm fmt:check for CI)
 pnpm check       # svelte-check + tsc --noEmit via turbo
-pnpm test        # vitest in both apps
+pnpm test        # vitest in api, web and scripts
 pnpm build       # nest build + vite build (adapter-node)
 pnpm db:start    # docker compose up: Postgres 5432, object storage 9000/9001, RabbitMQ 5672/15672
 pnpm worker      # turbo, scrape worker (apps/worker, hot reload via tsx)
 pnpm bucket:create  # create the S3 bucket once after `pnpm db:start`
 pnpm db:push     # apply packages/db schema (db:generate / db:migrate for SQL)
 pnpm auth:schema # regenerate packages/db/src/schema/auth.ts, then run pnpm fmt
-pnpm seed        # upsert the Digitraffic catalogue into location/cam (needs DATABASE_URL)
+pnpm seed        # upsert every camera source into location/cam (needs DATABASE_URL; `pnpm seed -- tfl` for one)
 pnpm gen:api     # export openapi.json from apps/api, then regenerate packages/api-client
 ```
 
@@ -40,6 +40,12 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
 
 ## Non-obvious constraints
 
+- **A camera id is only unique inside its provider.** `location.source` / `cam.source` carry the
+  provider id (`digitraffic`, `caltrans`, `tfl`, `foto-webcam`), and the natural keys are
+  `(source, original_id)` on both tables. `scripts/sources/*` is one adapter per provider — listing
+  to `location`/`cam` rows, plus the name cleanup in `scripts/lib/names.ts` — and the seed unions all
+  of them, so adding a source is a new adapter and nothing else. The seed never schedules a camera
+  faster than 10 minutes, whatever cadence the provider advertises.
 - **`apps/worker` is not Nest and owns the frame writes.** It reads `cam`, claims due rows
   (`next_poll_at <= now()` with `FOR UPDATE SKIP LOCKED`), and is the only writer of `frame`,
   `poll_attempt` and the poll columns of `cam`. `apps/api` reads those tables and never writes

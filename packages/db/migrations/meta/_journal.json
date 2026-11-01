@@ -15,6 +15,13 @@
 			"when": 1793569556239,
 			"tag": "0001_misty_betty_ross",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1793573999220,
+			"tag": "0002_safe_silver_surfer",
+			"breakpoints": true
 		}
 	]
 }
