@@ -42,6 +42,7 @@ export type WebcamsControllerListResponses = {
 	 */
 	200: Array<{
 		id: number;
+		source: string;
 		originalId: string;
 		name: string;
 		long: number;
@@ -88,6 +89,7 @@ export type WebcamsControllerFindOneResponses = {
 	 */
 	200: {
 		id: number;
+		source: string;
 		originalId: string;
 		name: string;
 		long: number;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CameraOffIcon from '@lucide/svelte/icons/camera-off';
 	import type { WebcamsControllerListResponse } from '@webcam-scrapper/api-client';
+	import { sourceLabel } from '#lib/webcams.js';
 
 	type Webcam = WebcamsControllerListResponse[number];
 
@@ -24,5 +25,8 @@
 			</div>
 		{/if}
 	</div>
-	<figcaption class="truncate text-sm">{webcam.name}</figcaption>
+	<figcaption class="flex min-w-0 flex-col">
+		<span class="truncate text-sm">{webcam.name}</span>
+		<span class="truncate text-xs text-muted-foreground">{sourceLabel(webcam.source)}</span>
+	</figcaption>
 </figure>

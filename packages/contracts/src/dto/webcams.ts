@@ -14,6 +14,11 @@ export type CamDto = z.infer<typeof camDto>;
 /** A location (camera site) as it appears in the map/list view. */
 export const webcamSummaryDto = z.object({
 	id: z.number().int(),
+	/**
+	 * The provider the site was seeded from (`digitraffic`, `caltrans`, `tfl`, `foto-webcam`), which
+	 * is what tells two sites with the same `originalId` apart and what the tile credits.
+	 */
+	source: z.string(),
 	originalId: z.string(),
 	name: z.string(),
 	/** Longitude in decimal degrees, WGS 84. */

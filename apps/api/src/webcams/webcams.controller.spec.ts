@@ -17,8 +17,9 @@ const cam = {
 
 const summary: WebcamListItemDto = {
 	id: 1,
+	source: 'digitraffic',
 	originalId: 'C01503',
-	name: 'kt51_Inkoo',
+	name: 'Kantatie 51, Inkoo',
 	long: 23.99616,
 	lat: 60.05374,
 	camCount: 3,
@@ -34,6 +35,7 @@ const summary: WebcamListItemDto = {
 
 const detail: WebcamDto = {
 	id: summary.id,
+	source: summary.source,
 	originalId: summary.originalId,
 	name: summary.name,
 	long: summary.long,

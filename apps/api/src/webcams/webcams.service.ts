@@ -27,7 +27,7 @@ export class WebcamsService {
 	 */
 	async list({ q, limit, offset }: ListWebcamsQuery): Promise<WebcamListItemDto[]> {
 		const rows = await this.db.query.location.findMany({
-			columns: { id: true, originalId: true, name: true, long: true, lat: true },
+			columns: { id: true, source: true, originalId: true, name: true, long: true, lat: true },
 			where: q ? ilike(location.name, `%${escapeLike(q)}%`) : undefined,
 			orderBy: [asc(location.name), asc(location.id)],
 			limit,
@@ -49,12 +49,13 @@ export class WebcamsService {
 
 		const camCounts = await this.countCams(rows.map(({ id }) => id));
 
-		return rows.map(({ cam: cams, id, originalId, name, long, lat }) => {
+		return rows.map(({ cam: cams, id, source, originalId, name, long, lat }) => {
 			const selected = cams.find(({ frame: frames }) => frames.length > 0) ?? cams[0];
 			const [latest] = selected?.frame ?? [];
 
 			return {
 				id,
+				source,
 				originalId,
 				name,
 				long,
@@ -84,7 +85,7 @@ export class WebcamsService {
 	/** One location with every camera view it carries. */
 	async findOne(id: number): Promise<WebcamDto> {
 		const locationRow = await this.db.query.location.findFirst({
-			columns: { id: true, originalId: true, name: true, long: true, lat: true },
+			columns: { id: true, source: true, originalId: true, name: true, long: true, lat: true },
 			where: eq(location.id, id),
 			with: {
 				cam: {
