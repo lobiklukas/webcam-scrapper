@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 
-	const demos = [{ name: 'better-auth', href: resolve('/demo/better-auth') }];
+	const demos = [{ name: 'auth (API-backed)', href: resolve('/demo/auth') }];
 </script>
 
 <!--
 	@component
-	Lists the add-on demos in `/demo/<add-on>`. Added by `sv add`.
+	Lists the auth demo in `/demo/auth`.
 
-	To remove: delete `<DemoLinks />` and its import, then `demo/DemoLinks.svelte`.
+	Auth itself lives in the API (`apps/api`, better-auth + drizzle); these pages only
+	call `/api/**` through the proxy in `hooks.server.ts`.
 -->
 
 <div class="sv-demo-links">

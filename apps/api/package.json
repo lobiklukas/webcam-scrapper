@@ -1,5 +1,5 @@
 {
-	"name": "@windy/api",
+	"name": "@webcam-scrapper/api",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
@@ -17,10 +17,15 @@
 		"@nestjs/common": "^12.3.2",
 		"@nestjs/config": "^12.0.1",
 		"@nestjs/core": "^12.3.2",
+		"@nestjs/drizzle": "^0.0.2",
 		"@nestjs/platform-express": "^12.3.2",
 		"@nestjs/swagger": "^12.0.5",
+		"@thallesp/nestjs-better-auth": "^2.8.0",
+		"@webcam-scrapper/db": "workspace:*",
+		"better-auth": "^1.7.14",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.15.1",
+		"drizzle-orm": "^0.45.2",
 		"reflect-metadata": "^0.2.2",
 		"rxjs": "^7.8.1"
 	},

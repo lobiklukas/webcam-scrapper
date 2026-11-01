@@ -6,6 +6,9 @@
 </script>
 
 <h1>Login</h1>
+<p class="text-sm text-gray-600">
+	Credentials are checked by the Nest API (<code>/api/auth/sign-in/email</code>).
+</p>
 <form method="post" action="?/signInEmail" use:enhance>
 	<label>
 		Email

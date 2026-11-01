@@ -5,12 +5,13 @@ Nest API. Read this before changing anything.
 
 ## Repo map
 
-| Path            | What it is                                                                    |
-| --------------- | ----------------------------------------------------------------------------- |
-| `apps/web`      | SvelteKit 3 app (Svelte 5, Tailwind 4, drizzle + better-auth, Postgres)       |
-| `apps/api`      | Nest 12 app (health, config, Swagger; ingestion and read API land here)       |
-| `packages/*`    | Workspace glob is wired but empty; put code both apps need here               |
-| `docs/research` | Product research: Windy teardown, camera sources, management flows, ingestion |
+| Path                 | What it is                                                                      |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `apps/web`           | SvelteKit 3 app (Svelte 5, Tailwind 4, adapter-node). No DB, no auth of its own |
+| `apps/api`           | Nest 12 app (health, config, Swagger, better-auth, drizzle client, Postgres)    |
+| `packages/db`        | drizzle schema (incl. generated better-auth tables), client factory, migrations |
+| `packages/contracts` | reserved: DTOs, socket events, job payloads                                     |
+| `docs/research`      | Product research: Windy teardown, camera sources, management flows, ingestion   |
 
 ## Commands (always from the repo root)
 
@@ -21,6 +22,9 @@ pnpm fmt         # oxfmt --write          (pnpm fmt:check for CI)
 pnpm check       # svelte-check + tsc --noEmit via turbo
 pnpm test        # vitest in both apps
 pnpm build       # nest build + vite build (adapter-node)
+pnpm db:start    # docker compose up (Postgres 5432, root compose.yaml)
+pnpm db:push     # apply packages/db schema (db:generate / db:migrate for SQL)
+pnpm auth:schema # regenerate packages/db/src/schema/auth.ts, then run pnpm fmt
 ```
 
 Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/formatting is
@@ -29,9 +33,26 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
 ## Non-obvious constraints
 
 - **`apps/web` targets Node** via `@sveltejs/adapter-node`: `build` is `vite build`, `start` is
-  `node --env-file-if-exists=.env build` (the env file is what supplies `PORT`, `ORIGIN`,
-  `DATABASE_URL`, `BETTER_AUTH_SECRET` in production). Do not reintroduce `bun --bun` or an
-  adapter that needs another runtime.
+  `node --env-file-if-exists=.env build` (the env file is what supplies `PORT`, `API_URL`, `ORIGIN`
+  in production). Do not reintroduce `bun --bun` or an adapter that needs another runtime.
+- **`apps/web` has no database access and no auth code.** Postgres belongs to `apps/api`, which owns
+  drizzle and better-auth. `apps/web/src/hooks.server.ts` proxies `/api/*` to `API_URL` and fills
+  `locals.user` / `locals.session` from `GET /api/auth/get-session`; server code reaches the API
+  through that proxy (`event.fetch('/api/…')`), never `API_URL` directly.
+- **`apps/api` runs with `bodyParser: false`.** `@thallesp/nestjs-better-auth` needs the raw request
+  body and re-adds JSON/urlencoded parsing for every other route. Dropping that flag breaks every
+  `/api/auth/*` call in a way that looks like a hang.
+- **The auth guard is global.** Every controller route requires a session unless the controller or
+  handler is marked `@AllowAnonymous()` (or `@OptionalAuth()`); `/health` is anonymous on purpose.
+  Drizzle is registered by `@nestjs/drizzle` in `AppModule` and injected via the `DB` token in
+  `src/db/db.ts`.
+- **better-auth tables are generated, not hand-written.** `packages/db/src/schema/auth.ts` comes from
+  `pnpm auth:schema`, which reads `packages/db/better-auth.config.ts`. Adding a plugin in
+  `apps/api/src/auth/auth.ts` means updating that config and regenerating, or the schema and runtime
+  disagree.
+- **`packages/db` is a built package.** `types` point at `src/`, runtime `exports` at `dist/`, so
+  `pnpm build` (turbo `^build`) must run before `apps/api` starts or its tests import stale/missing
+  `dist`.
 - **The web app owns port 5173, the API owns 3000.** `adapter-node` defaults to 3000, hence the
   `PORT` in `apps/web/.env`; keep that in mind before adding any other server.
 - **Lint/format are repo-level, not per-package.** `oxlint` and `oxfmt` run once over the tree from
@@ -57,5 +78,7 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
 - API: feature folders (`src/<feature>/<feature>.{module,controller,service}.ts`), config through
   `ConfigService` typed by `src/config/configuration.ts` — the only place that reads `process.env`.
 - Web: Svelte 5 runes, routes under `src/routes`, server-only code under `src/lib/server`.
+- Auth in the web app is a form action posting to the `/api/*` proxy with `event.fetch`, then a
+  redirect; the session itself always comes from `locals`, never from client-side state.
 - Tests are Vitest in both apps. `apps/web` component tests run in a real browser
   (`vitest-browser-svelte` + Playwright), so `pnpm exec playwright install chromium` is required once.

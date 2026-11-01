@@ -1,0 +1,41 @@
+{
+	"name": "@webcam-scrapper/db",
+	"version": "0.0.0",
+	"private": true,
+	"files": [
+		"dist"
+	],
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./dist/index.js"
+		},
+		"./schema": {
+			"types": "./src/schema/index.ts",
+			"default": "./dist/schema/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"dev": "tsc -p tsconfig.json --watch",
+		"check": "tsc --noEmit",
+		"db:push": "drizzle-kit push",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio",
+		"auth:schema": "auth generate --config ./better-auth.config.ts --output ./src/schema/auth.ts --yes"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.45.2",
+		"postgres": "^3.4.9"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"auth": "^1.7.14",
+		"better-auth": "^1.7.14",
+		"drizzle-kit": "^0.31.10",
+		"typescript": "catalog:"
+	}
+}

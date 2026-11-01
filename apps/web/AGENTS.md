@@ -3,8 +3,10 @@
 - **Language**: TypeScript
 - **Package Manager**: pnpm (workspace root: `../..`). This app targets Node through
   `@sveltejs/adapter-node`; build and start it from the root with `pnpm build` / `pnpm start`.
-- **Add-ons**: oxlint + oxfmt (repo-level config), tailwindcss, vitest (browser mode), adapter-node,
-  drizzle, better-auth, ai-tools
+- **Add-ons**: oxlint + oxfmt (repo-level config), tailwindcss, vitest (browser mode), adapter-node
+- **Auth/DB**: none in this app. better-auth and drizzle live in `apps/api` (schema in
+  `packages/db`); this app calls `/api/**` through the proxy in `src/hooks.server.ts` and reads
+  `locals.user` / `locals.session`.
 - **Lint/format**: do not add ESLint or Prettier here. Run `pnpm lint` / `pnpm fmt` at the root;
   Svelte template + a11y rules come from `@rsvelte/oxlint-plugin` (see `.oxlintrc.json`).
 

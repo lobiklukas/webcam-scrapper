@@ -1,17 +1,35 @@
 import type { Handle } from '@sveltejs/kit/hooks';
-import { building } from '$app/env';
-import { auth } from '#lib/server/auth.ts';
-import { svelteKitHandler } from 'better-auth/svelte-kit';
+import { isApiPath, proxyToApi } from '#lib/server/api-proxy.ts';
+import { readSession } from '#lib/server/session.ts';
 
-const handleBetterAuth: Handle = async ({ event, resolve }) => {
-	const session = await auth.api.getSession({ headers: event.request.headers });
-
-	if (session) {
-		event.locals.session = session.session;
-		event.locals.user = session.user;
+/**
+ * Two jobs, in order:
+ * 1. `/api/*` is proxied to the Nest API, so auth calls and the eventual read API are
+ *    same-origin for the browser (cookies, no CORS, no API URL in client code).
+ * 2. Every other request gets `locals.user` / `locals.session` from the API — documents
+ *    and SvelteKit data requests alike, which is what layouts, loads and form actions read.
+ */
+export const handle: Handle = async ({ event, resolve }) => {
+	if (isApiPath(event.url.pathname)) {
+		return proxyToApi(event);
 	}
 
-	return svelteKitHandler({ event, resolve, auth, building });
-};
+	const { snapshot, setCookies } = await readSession(event.request.headers.get('cookie'));
+	if (snapshot) {
+		event.locals.user = snapshot.user;
+		event.locals.session = snapshot.session;
+	}
 
-export const handle: Handle = handleBetterAuth;
+	const response = await resolve(event);
+	if (setCookies.length === 0) return response;
+
+	// better-auth rolls the session expiry; pass the refreshed cookie to the browser.
+	const headers = new Headers(response.headers);
+	for (const cookie of setCookies) headers.append('set-cookie', cookie);
+
+	return new Response(response.body, {
+		status: response.status,
+		statusText: response.statusText,
+		headers
+	});
+};

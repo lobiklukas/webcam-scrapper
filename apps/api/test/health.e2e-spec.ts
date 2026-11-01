@@ -26,4 +26,10 @@ describe('HTTP surface (e2e)', () => {
 
 		expect(response.body).toMatchObject({ status: 'ok' });
 	});
+
+	it('serves the better-auth endpoints outside the session guard', async () => {
+		const response = await request(app.getHttpServer()).get('/api/auth/ok').expect(200);
+
+		expect(response.body).toMatchObject({ ok: true });
+	});
 });

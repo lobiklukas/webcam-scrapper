@@ -1,13 +1,22 @@
-# @windy/web
+# @webcam-scrapper/web
 
 SvelteKit front end: camera map, player, management UI. Part of the repo described in
 [`../../README.md`](../../README.md) — run commands from the repo root.
 
-- Dev server: <http://localhost:5173> (`pnpm dev --filter @windy/web`)
+- Dev server: <http://localhost:5173> (`pnpm dev --filter @webcam-scrapper/web`)
 - Production build (`@sveltejs/adapter-node`): `pnpm build`, then `pnpm start`
   (`node --env-file-if-exists=.env build`, serves on `PORT` from `.env`)
-- Postgres via `../..`: `pnpm db:start`; env in `.env` (copy `.env.example`)
 - Env vars are validated at build time and at boot — a missing value fails fast at startup
 
-Drizzle schema: `src/lib/server/db/schema.ts`. Better-auth config: `src/lib/server/auth.ts`
-(`pnpm auth:schema` regenerates the auth tables).
+This app has **no database and no auth code**. The Nest API owns both; this app is a client:
+
+- `src/hooks.server.ts` proxies `/api/*` to `API_URL`, so the browser only ever sees `:5173` and the
+  session cookie belongs to this origin.
+- The same hook fills `locals.user` / `locals.session` from `GET /api/auth/get-session`, so loads and
+  form actions read the session on the server.
+- Form actions post to the API with `event.fetch('/api/auth/…')` — SvelteKit forwards the `Set-Cookie`
+  the API returns.
+- `/demo/auth` is the login / sign-up / sign-out example; it uses exactly those two mechanisms.
+
+Env (`.env`, copy `.env.example`): `PORT`, `API_URL` (base URL of the API, e.g.
+`http://localhost:3000`), `ORIGIN`.

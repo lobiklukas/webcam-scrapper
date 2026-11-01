@@ -6,7 +6,9 @@ import { AppModule } from './app.module.js';
 import type { AppConfig } from './config/configuration.js';
 
 async function bootstrap(): Promise<void> {
-	const app = await NestFactory.create(AppModule);
+	// Body parsing is disabled so better-auth receives the raw request body; the auth module
+	// re-adds the JSON/urlencoded parsers for every other route.
+	const app = await NestFactory.create(AppModule, { bodyParser: false });
 	const config = app.get<ConfigService<AppConfig, true>>(ConfigService);
 
 	app.enableCors({ origin: config.get('webOrigin', { infer: true }), credentials: true });

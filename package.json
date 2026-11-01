@@ -1,5 +1,5 @@
 {
-	"name": "windy",
+	"name": "webcam-scrapper",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
@@ -13,11 +13,12 @@
 		"lint:fix": "oxlint --fix && oxlint --type-aware --fix apps/api",
 		"fmt": "oxfmt",
 		"fmt:check": "oxfmt --check",
-		"db:start": "pnpm --filter @windy/web db:start",
-		"db:push": "pnpm --filter @windy/web db:push",
-		"db:generate": "pnpm --filter @windy/web db:generate",
-		"db:migrate": "pnpm --filter @windy/web db:migrate",
-		"db:studio": "pnpm --filter @windy/web db:studio"
+		"db:start": "docker compose up",
+		"db:push": "pnpm --filter @webcam-scrapper/db db:push",
+		"db:generate": "pnpm --filter @webcam-scrapper/db db:generate",
+		"db:migrate": "pnpm --filter @webcam-scrapper/db db:migrate",
+		"db:studio": "pnpm --filter @webcam-scrapper/db db:studio",
+		"auth:schema": "pnpm --filter @webcam-scrapper/db auth:schema"
 	},
 	"devDependencies": {
 		"@rsvelte/oxlint-plugin": "catalog:",

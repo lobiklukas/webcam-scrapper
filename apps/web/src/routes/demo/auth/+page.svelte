@@ -7,6 +7,9 @@
 
 <h1>Hi, {data.user.name}!</h1>
 <p>Your user ID is {data.user.id}.</p>
+<p class="text-sm text-gray-600">
+	Session lives in the API: <code>GET /api/auth/get-session</code> through the proxy.
+</p>
 <form method="post" action="?/signOut" use:enhance>
 	<button class="rounded-md bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
 		>Sign out</button
