@@ -67,11 +67,7 @@
 {:else}
 	<div class="grid grid-flow-row grid-cols-3 gap-4">
 		{#each webcams as webcam (webcam.id)}
-			<!--
-				TODO: render the rest. `webcam` is WebcamSummaryDto:
-				{ id, originalId, name, long, lat, camCount }
-			-->
-			<Tile name={webcam.name} />
+			<Tile {webcam} />
 		{/each}
 
 		{#if $query.isFetchingNextPage}
