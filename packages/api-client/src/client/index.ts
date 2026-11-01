@@ -2,6 +2,7 @@
 
 export {
 	framesControllerFindOne,
+	framesControllerList,
 	healthControllerCheck,
 	type Options,
 	webcamsControllerFindOne,
@@ -12,6 +13,9 @@ export type {
 	FramesControllerFindOneData,
 	FramesControllerFindOneErrors,
 	FramesControllerFindOneResponses,
+	FramesControllerListData,
+	FramesControllerListResponse,
+	FramesControllerListResponses,
 	HealthControllerCheckData,
 	HealthControllerCheckResponse,
 	HealthControllerCheckResponses,

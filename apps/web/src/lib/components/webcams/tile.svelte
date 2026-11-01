@@ -8,7 +8,7 @@
 	let { webcam }: { webcam: Webcam } = $props();
 </script>
 
-<figure class="flex flex-col gap-1.5">
+<a href="/webcams/{webcam.id}" class="group flex flex-col gap-1.5">
 	<div class="aspect-video w-full overflow-hidden rounded-xl bg-muted">
 		{#if webcam.frame}
 			<img
@@ -16,7 +16,7 @@
 				alt={webcam.name}
 				loading="lazy"
 				decoding="async"
-				class="size-full object-cover"
+				class="size-full object-cover transition group-hover:scale-[1.02]"
 			/>
 		{:else}
 			<div class="flex size-full flex-col items-center justify-center gap-1 text-muted-foreground">
@@ -25,8 +25,6 @@
 			</div>
 		{/if}
 	</div>
-	<figcaption class="flex min-w-0 flex-col">
-		<span class="truncate text-sm">{webcam.name}</span>
-		<span class="truncate text-xs text-muted-foreground">{sourceLabel(webcam.source)}</span>
-	</figcaption>
-</figure>
+	<span class="truncate text-sm group-hover:underline">{webcam.name}</span>
+	<span class="truncate text-xs text-muted-foreground">{sourceLabel(webcam.source)}</span>
+</a>

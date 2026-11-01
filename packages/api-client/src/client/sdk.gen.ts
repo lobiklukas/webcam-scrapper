@@ -12,6 +12,8 @@ import type {
 	FramesControllerFindOneData,
 	FramesControllerFindOneErrors,
 	FramesControllerFindOneResponses,
+	FramesControllerListData,
+	FramesControllerListResponses,
 	HealthControllerCheckData,
 	HealthControllerCheckResponses,
 	WebcamsControllerFindOneData,
@@ -63,6 +65,14 @@ export const webcamsControllerFindOne = <ThrowOnError extends boolean = false>(
 		WebcamsControllerFindOneErrors,
 		ThrowOnError
 	>({ url: '/api/webcams/{id}', ...options });
+
+export const framesControllerList = <ThrowOnError extends boolean = false>(
+	options: Options<FramesControllerListData, ThrowOnError>
+): RequestResult<FramesControllerListResponses, unknown, ThrowOnError> =>
+	(options.client ?? client).get<FramesControllerListResponses, unknown, ThrowOnError>({
+		url: '/api/frames',
+		...options
+	});
 
 export const framesControllerFindOne = <ThrowOnError extends boolean = false>(
 	options: Options<FramesControllerFindOneData, ThrowOnError>

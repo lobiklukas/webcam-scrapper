@@ -1,495 +1,536 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://windy.local/schemas/camera-model.schema.json",
-  "title": "Camera domain model (v1)",
-  "description": "Machine-readable model for the camera-management layer described in docs/research/03-camera-management.md, with the provider registry from docs/research/data/sources.json. The root object is a full domain bundle, so the same file validates an import/seed file and is the reference for the Drizzle tables. Field names are snake_case on purpose: they become column names. docs/architecture.md calls the camera `webcam` and its connection `webcam_source`; this file uses `camera` / `camera_image_source` from the management doc, which is the later, operational model. Where the two disagree, the management doc wins.",
-  "type": "object",
-  "additionalProperties": false,
-  "properties": {
-    "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
-    "categories": { "type": "array", "items": { "$ref": "#/$defs/category" } },
-    "cameras": { "type": "array", "items": { "$ref": "#/$defs/camera" } },
-    "camera_image_sources": { "type": "array", "items": { "$ref": "#/$defs/camera_image_source" } },
-    "camera_categories": { "type": "array", "items": { "$ref": "#/$defs/camera_category" } },
-    "frames": { "type": "array", "items": { "$ref": "#/$defs/frame" } },
-    "poll_attempts": { "type": "array", "items": { "$ref": "#/$defs/poll_attempt" } },
-    "camera_import_runs": { "type": "array", "items": { "$ref": "#/$defs/camera_import_run" } }
-  },
-  "$defs": {
-    "uuid": { "type": "string", "format": "uuid" },
-    "timestamp": { "type": "string", "format": "date-time" },
-    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-    "country_code": {
-      "type": "string",
-      "description": "ISO 3166-1 alpha-2, uppercase. Caltrans and TfL listings give no country; the probe derives it by reverse geocoding.",
-      "pattern": "^[A-Z]{2}$"
-    },
-    "region_code": {
-      "type": "string",
-      "description": "ISO 3166-2 subdivision code without the country prefix, e.g. \"CA\" for US-CA.",
-      "pattern": "^[A-Z0-9]{1,3}$"
-    },
-    "camera_status": {
-      "type": "string",
-      "description": "unverified: probe passed, no frame stored yet. active: at least one stored frame. paused: frames kept, polling stopped. retired: hidden from map and player, row kept for the audit trail.",
-      "enum": ["unverified", "active", "paused", "retired"]
-    },
-    "paused_reason": {
-      "type": "string",
-      "description": "manual: an operator paused it; only an operator resumes it. provider_failures: failure_count >= 3, recovery is automatic. missing_from_source: an import no longer lists the camera; the operator decides.",
-      "enum": ["manual", "provider_failures", "missing_from_source"]
-    },
-    "probe_status": {
-      "type": "string",
-      "description": "Outcome of the add-camera probe. Each value maps to one message in the UI (docs/research/03-camera-management.md, \"Failure messages\").",
-      "enum": [
-        "ok",
-        "http_error",
-        "timeout",
-        "too_large",
-        "bad_content_type",
-        "bad_magic_bytes",
-        "dimensions_out_of_range",
-        "ssrf_rejected",
-        "blocked"
-      ]
-    },
-    "poll_status": {
-      "type": "string",
-      "description": "ok: new bytes stored. unchanged: conditional request or identical sha256, no new frame. Everything else is a failure.",
-      "enum": [
-        "ok",
-        "unchanged",
-        "http_error",
-        "timeout",
-        "too_large",
-        "bad_content_type",
-        "blocked",
-        "ssrf_rejected"
-      ]
-    },
-    "source_kind": {
-      "type": "string",
-      "description": "catalogue_api: a listing endpoint we can bulk import (Digitraffic, Caltrans, TfL). direct_snapshot: a known image URL template. page_scrape: discovery through og:image and friends (foto-webcam). manual: one operator-entered URL.",
-      "enum": ["catalogue_api", "direct_snapshot", "page_scrape", "manual"]
-    },
-    "image_source_kind": {
-      "type": "string",
-      "description": "snapshot is the only kind the v1 poller fetches. hls/mp4/youtube are stored so the player can offer a live tab and are out of scope until the stream phase.",
-      "enum": ["snapshot", "hls", "mp4", "youtube"]
-    },
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://windy.local/schemas/camera-model.schema.json",
+	"title": "Camera domain model (v1)",
+	"description": "Machine-readable model for the camera-management layer described in docs/research/03-camera-management.md, with the provider registry from docs/research/data/sources.json. The root object is a full domain bundle, so the same file validates an import/seed file and is the reference for the Drizzle tables. Field names are snake_case on purpose: they become column names. docs/architecture.md calls the camera `webcam` and its connection `webcam_source`; this file uses `camera` / `camera_image_source` from the management doc, which is the later, operational model. Where the two disagree, the management doc wins.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
+		"categories": { "type": "array", "items": { "$ref": "#/$defs/category" } },
+		"cameras": { "type": "array", "items": { "$ref": "#/$defs/camera" } },
+		"camera_image_sources": { "type": "array", "items": { "$ref": "#/$defs/camera_image_source" } },
+		"camera_categories": { "type": "array", "items": { "$ref": "#/$defs/camera_category" } },
+		"frames": { "type": "array", "items": { "$ref": "#/$defs/frame" } },
+		"poll_attempts": { "type": "array", "items": { "$ref": "#/$defs/poll_attempt" } },
+		"camera_import_runs": { "type": "array", "items": { "$ref": "#/$defs/camera_import_run" } }
+	},
+	"$defs": {
+		"uuid": { "type": "string", "format": "uuid" },
+		"timestamp": { "type": "string", "format": "date-time" },
+		"sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+		"country_code": {
+			"type": "string",
+			"description": "ISO 3166-1 alpha-2, uppercase. Caltrans and TfL listings give no country; the probe derives it by reverse geocoding.",
+			"pattern": "^[A-Z]{2}$"
+		},
+		"region_code": {
+			"type": "string",
+			"description": "ISO 3166-2 subdivision code without the country prefix, e.g. \"CA\" for US-CA.",
+			"pattern": "^[A-Z0-9]{1,3}$"
+		},
+		"camera_status": {
+			"type": "string",
+			"description": "unverified: probe passed, no frame stored yet. active: at least one stored frame. paused: frames kept, polling stopped. retired: hidden from map and player, row kept for the audit trail.",
+			"enum": ["unverified", "active", "paused", "retired"]
+		},
+		"paused_reason": {
+			"type": "string",
+			"description": "manual: an operator paused it; only an operator resumes it. provider_failures: failure_count >= 3, recovery is automatic. missing_from_source: an import no longer lists the camera; the operator decides.",
+			"enum": ["manual", "provider_failures", "missing_from_source"]
+		},
+		"probe_status": {
+			"type": "string",
+			"description": "Outcome of the add-camera probe. Each value maps to one message in the UI (docs/research/03-camera-management.md, \"Failure messages\").",
+			"enum": [
+				"ok",
+				"http_error",
+				"timeout",
+				"too_large",
+				"bad_content_type",
+				"bad_magic_bytes",
+				"dimensions_out_of_range",
+				"ssrf_rejected",
+				"blocked"
+			]
+		},
+		"poll_status": {
+			"type": "string",
+			"description": "ok: new bytes stored. unchanged: conditional request or identical sha256, no new frame. Everything else is a failure.",
+			"enum": [
+				"ok",
+				"unchanged",
+				"http_error",
+				"timeout",
+				"too_large",
+				"bad_content_type",
+				"blocked",
+				"ssrf_rejected"
+			]
+		},
+		"source_kind": {
+			"type": "string",
+			"description": "catalogue_api: a listing endpoint we can bulk import (Digitraffic, Caltrans, TfL). direct_snapshot: a known image URL template. page_scrape: discovery through og:image and friends (foto-webcam). manual: one operator-entered URL.",
+			"enum": ["catalogue_api", "direct_snapshot", "page_scrape", "manual"]
+		},
+		"image_source_kind": {
+			"type": "string",
+			"description": "snapshot is the only kind the v1 poller fetches. hls/mp4/youtube are stored so the player can offer a live tab and are out of scope until the stream phase.",
+			"enum": ["snapshot", "hls", "mp4", "youtube"]
+		},
 
-    "source": {
-      "type": "object",
-      "description": "A provider. Seeded from docs/research/data/sources.json; `id` is the stable slug used by adapters and by camera.source_id.",
-      "additionalProperties": false,
-      "required": ["id", "name", "kind", "license_url"],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Stable slug, also the adapter key. Never rename: camera rows and import runs point at it.",
-          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-          "examples": ["digitraffic-fi", "caltrans-cwwp2", "tfl-jamcams", "foto-webcam-eu", "panomax", "manual"]
-        },
-        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "kind": { "$ref": "#/$defs/source_kind" },
-        "region": {
-          "type": "string",
-          "description": "ISO 3166-1 alpha-2, or a comma-separated list of them, or \"worldwide\" when the provider has no single region.",
-          "examples": ["FI", "US-CA", "GB-LON", "AT,DE,CH,IT", "worldwide"]
-        },
-        "license_url": { "type": "string", "format": "uri" },
-        "license_name": { "type": "string", "examples": ["CC BY 4.0", "TfL open data"] },
-        "attribution_text": {
-          "type": "string",
-          "description": "The credit line a camera of this source must render. Copied onto camera.attribution_text at import time, because the credit is a licence condition and must survive a provider going away.",
-          "examples": ["Fintraffic / Digitraffic", "Caltrans", "Powered by TfL Open Data"]
-        },
-        "cadence_seconds": {
-          "type": "integer",
-          "description": "The provider's own update cadence. Only an upper bound for polling: the per-camera interval is probed, not copied from here.",
-          "minimum": 60,
-          "examples": [60, 600]
-        },
-        "camera_count": {
-          "type": ["integer", "null"],
-          "description": "Camera views in the last successful catalogue read. null when the provider has no listing endpoint (PANOMAX).",
-          "minimum": 0
-        },
-        "listing": {
-          "type": "object",
-          "description": "How to read the catalogue. Present only for kind = catalogue_api or page_scrape.",
-          "additionalProperties": false,
-          "required": ["url"],
-          "properties": {
-            "url": {
-              "type": "string",
-              "description": "May contain {district} placeholders; the adapter expands them.",
-              "format": "uri-template"
-            },
-            "format": { "type": "string", "enum": ["geojson", "json", "csv", "xml", "txt", "html"] },
-            "request_headers": { "$ref": "#/$defs/request_headers" },
-            "notes": { "type": "string" }
-          }
-        },
-        "image": {
-          "type": "object",
-          "description": "How to turn a provider camera reference into an image URL. Absent when the URL can only be read from the listing (Caltrans).",
-          "additionalProperties": false,
-          "properties": {
-            "url_template": {
-              "type": "string",
-              "description": "Placeholders: {id} = provider_camera_ref, {size} = one of sizes.",
-              "format": "uri-template",
-              "examples": ["https://weathercam.digitraffic.fi/{id}.jpg"]
-            },
-            "sizes": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
-            "verified_example": { "type": "string", "format": "uri" }
-          }
-        },
-        "verified_at": { "$ref": "#/$defs/timestamp" }
-      }
-    },
+		"source": {
+			"type": "object",
+			"description": "A provider. Seeded from docs/research/data/sources.json; `id` is the stable slug used by adapters and by camera.source_id.",
+			"additionalProperties": false,
+			"required": ["id", "name", "kind", "license_url"],
+			"properties": {
+				"id": {
+					"type": "string",
+					"description": "Stable slug, also the adapter key. Never rename: camera rows and import runs point at it.",
+					"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+					"examples": [
+						"digitraffic-fi",
+						"caltrans-cwwp2",
+						"tfl-jamcams",
+						"foto-webcam-eu",
+						"panomax",
+						"manual"
+					]
+				},
+				"name": { "type": "string", "minLength": 1, "maxLength": 120 },
+				"kind": { "$ref": "#/$defs/source_kind" },
+				"region": {
+					"type": "string",
+					"description": "ISO 3166-1 alpha-2, or a comma-separated list of them, or \"worldwide\" when the provider has no single region.",
+					"examples": ["FI", "US-CA", "GB-LON", "AT,DE,CH,IT", "worldwide"]
+				},
+				"license_url": { "type": "string", "format": "uri" },
+				"license_name": { "type": "string", "examples": ["CC BY 4.0", "TfL open data"] },
+				"attribution_text": {
+					"type": "string",
+					"description": "The credit line a camera of this source must render. Copied onto camera.attribution_text at import time, because the credit is a licence condition and must survive a provider going away.",
+					"examples": ["Fintraffic / Digitraffic", "Caltrans", "Powered by TfL Open Data"]
+				},
+				"cadence_seconds": {
+					"type": "integer",
+					"description": "The provider's own update cadence. Only an upper bound for polling: the per-camera interval is probed, not copied from here.",
+					"minimum": 60,
+					"examples": [60, 600]
+				},
+				"camera_count": {
+					"type": ["integer", "null"],
+					"description": "Camera views in the last successful catalogue read. null when the provider has no listing endpoint (PANOMAX).",
+					"minimum": 0
+				},
+				"listing": {
+					"type": "object",
+					"description": "How to read the catalogue. Present only for kind = catalogue_api or page_scrape.",
+					"additionalProperties": false,
+					"required": ["url"],
+					"properties": {
+						"url": {
+							"type": "string",
+							"description": "May contain {district} placeholders; the adapter expands them.",
+							"format": "uri-template"
+						},
+						"format": {
+							"type": "string",
+							"enum": ["geojson", "json", "csv", "xml", "txt", "html"]
+						},
+						"request_headers": { "$ref": "#/$defs/request_headers" },
+						"notes": { "type": "string" }
+					}
+				},
+				"image": {
+					"type": "object",
+					"description": "How to turn a provider camera reference into an image URL. Absent when the URL can only be read from the listing (Caltrans).",
+					"additionalProperties": false,
+					"properties": {
+						"url_template": {
+							"type": "string",
+							"description": "Placeholders: {id} = provider_camera_ref, {size} = one of sizes.",
+							"format": "uri-template",
+							"examples": ["https://weathercam.digitraffic.fi/{id}.jpg"]
+						},
+						"sizes": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+						"verified_example": { "type": "string", "format": "uri" }
+					}
+				},
+				"verified_at": { "$ref": "#/$defs/timestamp" }
+			}
+		},
 
-    "request_headers": {
-      "type": "object",
-      "description": "Extra headers sent with every fetch for this camera. Some providers refuse the request without them (Digitraffic wants Accept-Encoding: gzip and a Digitraffic-User). Values may reference secrets by name; never store a token in plain text here.",
-      "propertyNames": {
-        "type": "string",
-        "pattern": "^[A-Za-z0-9-]+$"
-      },
-      "additionalProperties": { "type": "string", "maxLength": 1024 },
-      "examples": [{ "Digitraffic-User": "windy-clone", "Accept-Encoding": "gzip" }]
-    },
+		"request_headers": {
+			"type": "object",
+			"description": "Extra headers sent with every fetch for this camera. Some providers refuse the request without them (Digitraffic wants Accept-Encoding: gzip and a Digitraffic-User). Values may reference secrets by name; never store a token in plain text here.",
+			"propertyNames": {
+				"type": "string",
+				"pattern": "^[A-Za-z0-9-]+$"
+			},
+			"additionalProperties": { "type": "string", "maxLength": 1024 },
+			"examples": [{ "Digitraffic-User": "windy-clone", "Accept-Encoding": "gzip" }]
+		},
 
-    "camera": {
-      "type": "object",
-      "description": "One camera view. A station with several presets is several cameras; the preset id is provider_camera_ref, not the station id.",
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "public_id",
-        "title",
-        "lat",
-        "lon",
-        "status",
-        "source_id",
-        "poll_interval_s",
-        "license_code",
-        "license_url",
-        "attribution_text",
-        "created_at",
-        "updated_at"
-      ],
-      "properties": {
-        "id": { "$ref": "#/$defs/uuid" },
-        "public_id": {
-          "type": "string",
-          "description": "Short slug used in public URLs. Stable once published.",
-          "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
-        },
-        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "description": { "type": ["string", "null"], "maxLength": 2000 },
-        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
-        "lon": { "type": "number", "minimum": -180, "maximum": 180 },
-        "timezone": {
-          "type": ["string", "null"],
-          "description": "IANA zone derived from the coordinates by the server; editable because the derived zone is occasionally wrong near a border.",
-          "examples": ["Europe/Helsinki", "America/Los_Angeles", "Europe/London"]
-        },
-        "country_code": { "anyOf": [{ "$ref": "#/$defs/country_code" }, { "type": "null" }] },
-        "region_code": { "anyOf": [{ "$ref": "#/$defs/region_code" }, { "type": "null" }] },
-        "city": { "type": ["string", "null"], "maxLength": 120 },
-        "status": { "$ref": "#/$defs/camera_status" },
-        "paused_reason": { "anyOf": [{ "$ref": "#/$defs/paused_reason" }, { "type": "null" }] },
-        "source_id": {
-          "type": "string",
-          "description": "References source.id. Kept as the source slug rather than a UUID so imports and adapters stay readable.",
-          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
-        },
-        "provider_camera_ref": {
-          "type": ["string", "null"],
-          "description": "The provider's own identifier: the Digitraffic preset id (C0150301), the TfL id (00002.00865), the Caltrans index. Together with source_id it is the import match key and one of the duplicate checks.",
-          "examples": ["C0150301", "00002.00865", "hwy5atpocket", "hochgrat"]
-        },
-        "page_url": {
-          "type": ["string", "null"],
-          "format": "uri",
-          "description": "Provider page, used as the credit link. foto-webcam.eu allows embedding only if the image links back here."
-        },
-        "license_code": {
-          "type": "string",
-          "description": "Short licence identifier. Anything with an attribution obligation must carry attribution_text.",
-          "examples": ["CC-BY-4.0", "OGL-3.0", "caltrans-fair-use", "foto-webcam-embed"]
-        },
-        "license_url": { "type": "string", "format": "uri" },
-        "attribution_text": { "type": "string", "minLength": 1, "maxLength": 200 },
-        "poll_interval_s": {
-          "type": "integer",
-          "description": "Per-camera cadence, fixed at save time from the probe and never inferred again. 60 is the floor: no verified source updates faster.",
-          "minimum": 60,
-          "maximum": 86400
-        },
-        "poll_enabled": {
-          "type": "boolean",
-          "description": "Scheduler flag, independent of status. Failure-driven deactivation leaves it true so a recovered provider resumes on its own; a manual pause leaves it false.",
-          "default": true
-        },
-        "request_headers": { "$ref": "#/$defs/request_headers" },
-        "last_probe_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
-        "last_probe_status": { "anyOf": [{ "$ref": "#/$defs/probe_status" }, { "type": "null" }] },
-        "last_probe_ms": { "type": ["integer", "null"], "minimum": 0 },
-        "last_ok_at": {
-          "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }],
-          "description": "Last poll that produced a new frame. Drives the list default sort (last frame age puts broken cameras first)."
-        },
-        "last_frame_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
-        "failure_count": {
-          "type": "integer",
-          "description": "Consecutive failed polls. Reset on success; reaching 3 sets status = paused with paused_reason = provider_failures.",
-          "minimum": 0,
-          "default": 0
-        },
-        "next_poll_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
-        "created_by": {
-          "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }],
-          "description": "better-auth user id. Null for rows created by an import run rather than a person."
-        },
-        "created_at": { "$ref": "#/$defs/timestamp" },
-        "updated_at": { "$ref": "#/$defs/timestamp" }
-      },
-      "allOf": [
-        {
-          "description": "A camera is saved as unverified only after a successful probe; saving an unprobed camera is not allowed.",
-          "if": { "properties": { "status": { "const": "unverified" } }, "required": ["status"] },
-          "then": {
-            "properties": { "last_probe_status": { "const": "ok" } },
-            "required": ["last_probe_status"]
-          }
-        },
-        {
-          "description": "active needs one stored frame.",
-          "if": { "properties": { "status": { "const": "active" } }, "required": ["status"] },
-          "then": { "required": ["last_frame_at"], "properties": { "last_frame_at": { "$ref": "#/$defs/timestamp" } } }
-        },
-        {
-          "description": "paused is the only state with a reason, and it always has one.",
-          "if": { "properties": { "status": { "const": "paused" } }, "required": ["status"] },
-          "then": { "required": ["paused_reason"], "properties": { "paused_reason": { "$ref": "#/$defs/paused_reason" } } },
-          "else": { "properties": { "paused_reason": { "type": "null" } } }
-        },
-        {
-          "description": "Failure-driven pause is the one case the scheduler keeps retrying.",
-          "if": {
-            "properties": { "paused_reason": { "const": "provider_failures" } },
-            "required": ["paused_reason"]
-          },
-          "then": { "properties": { "poll_enabled": { "const": true } } }
-        }
-      ]
-    },
+		"camera": {
+			"type": "object",
+			"description": "One camera view. A station with several presets is several cameras; the preset id is provider_camera_ref, not the station id.",
+			"additionalProperties": false,
+			"required": [
+				"id",
+				"public_id",
+				"title",
+				"lat",
+				"lon",
+				"status",
+				"source_id",
+				"poll_interval_s",
+				"license_code",
+				"license_url",
+				"attribution_text",
+				"created_at",
+				"updated_at"
+			],
+			"properties": {
+				"id": { "$ref": "#/$defs/uuid" },
+				"public_id": {
+					"type": "string",
+					"description": "Short slug used in public URLs. Stable once published.",
+					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+				},
+				"title": { "type": "string", "minLength": 1, "maxLength": 120 },
+				"description": { "type": ["string", "null"], "maxLength": 2000 },
+				"lat": { "type": "number", "minimum": -90, "maximum": 90 },
+				"lon": { "type": "number", "minimum": -180, "maximum": 180 },
+				"timezone": {
+					"type": ["string", "null"],
+					"description": "IANA zone derived from the coordinates by the server; editable because the derived zone is occasionally wrong near a border.",
+					"examples": ["Europe/Helsinki", "America/Los_Angeles", "Europe/London"]
+				},
+				"country_code": { "anyOf": [{ "$ref": "#/$defs/country_code" }, { "type": "null" }] },
+				"region_code": { "anyOf": [{ "$ref": "#/$defs/region_code" }, { "type": "null" }] },
+				"city": { "type": ["string", "null"], "maxLength": 120 },
+				"status": { "$ref": "#/$defs/camera_status" },
+				"paused_reason": { "anyOf": [{ "$ref": "#/$defs/paused_reason" }, { "type": "null" }] },
+				"source_id": {
+					"type": "string",
+					"description": "References source.id. Kept as the source slug rather than a UUID so imports and adapters stay readable.",
+					"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+				},
+				"provider_camera_ref": {
+					"type": ["string", "null"],
+					"description": "The provider's own identifier: the Digitraffic preset id (C0150301), the TfL id (00002.00865), the Caltrans index. Together with source_id it is the import match key and one of the duplicate checks.",
+					"examples": ["C0150301", "00002.00865", "hwy5atpocket", "hochgrat"]
+				},
+				"page_url": {
+					"type": ["string", "null"],
+					"format": "uri",
+					"description": "Provider page, used as the credit link. foto-webcam.eu allows embedding only if the image links back here."
+				},
+				"license_code": {
+					"type": "string",
+					"description": "Short licence identifier. Anything with an attribution obligation must carry attribution_text.",
+					"examples": ["CC-BY-4.0", "OGL-3.0", "caltrans-fair-use", "foto-webcam-embed"]
+				},
+				"license_url": { "type": "string", "format": "uri" },
+				"attribution_text": { "type": "string", "minLength": 1, "maxLength": 200 },
+				"poll_interval_s": {
+					"type": "integer",
+					"description": "Per-camera cadence, fixed at save time from the probe and never inferred again. 60 is the floor: no verified source updates faster.",
+					"minimum": 60,
+					"maximum": 86400
+				},
+				"poll_enabled": {
+					"type": "boolean",
+					"description": "Scheduler flag, independent of status. Failure-driven deactivation leaves it true so a recovered provider resumes on its own; a manual pause leaves it false.",
+					"default": true
+				},
+				"request_headers": { "$ref": "#/$defs/request_headers" },
+				"last_probe_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
+				"last_probe_status": { "anyOf": [{ "$ref": "#/$defs/probe_status" }, { "type": "null" }] },
+				"last_probe_ms": { "type": ["integer", "null"], "minimum": 0 },
+				"last_ok_at": {
+					"anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }],
+					"description": "Last poll that produced a new frame. Drives the list default sort (last frame age puts broken cameras first)."
+				},
+				"last_frame_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
+				"failure_count": {
+					"type": "integer",
+					"description": "Consecutive failed polls. Reset on success; reaching 3 sets status = paused with paused_reason = provider_failures.",
+					"minimum": 0,
+					"default": 0
+				},
+				"next_poll_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
+				"created_by": {
+					"anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }],
+					"description": "better-auth user id. Null for rows created by an import run rather than a person."
+				},
+				"created_at": { "$ref": "#/$defs/timestamp" },
+				"updated_at": { "$ref": "#/$defs/timestamp" }
+			},
+			"allOf": [
+				{
+					"description": "A camera is saved as unverified only after a successful probe; saving an unprobed camera is not allowed.",
+					"if": { "properties": { "status": { "const": "unverified" } }, "required": ["status"] },
+					"then": {
+						"properties": { "last_probe_status": { "const": "ok" } },
+						"required": ["last_probe_status"]
+					}
+				},
+				{
+					"description": "active needs one stored frame.",
+					"if": { "properties": { "status": { "const": "active" } }, "required": ["status"] },
+					"then": {
+						"required": ["last_frame_at"],
+						"properties": { "last_frame_at": { "$ref": "#/$defs/timestamp" } }
+					}
+				},
+				{
+					"description": "paused is the only state with a reason, and it always has one.",
+					"if": { "properties": { "status": { "const": "paused" } }, "required": ["status"] },
+					"then": {
+						"required": ["paused_reason"],
+						"properties": { "paused_reason": { "$ref": "#/$defs/paused_reason" } }
+					},
+					"else": { "properties": { "paused_reason": { "type": "null" } } }
+				},
+				{
+					"description": "Failure-driven pause is the one case the scheduler keeps retrying.",
+					"if": {
+						"properties": { "paused_reason": { "const": "provider_failures" } },
+						"required": ["paused_reason"]
+					},
+					"then": { "properties": { "poll_enabled": { "const": true } } }
+				}
+			]
+		},
 
-    "camera_image_source": {
-      "type": "object",
-      "description": "One fetchable URL of a camera. A camera may have a snapshot and an HLS stream at once; exactly one row is the primary snapshot.",
-      "additionalProperties": false,
-      "required": ["id", "camera_id", "kind", "url", "is_primary"],
-      "properties": {
-        "id": { "$ref": "#/$defs/uuid" },
-        "camera_id": { "$ref": "#/$defs/uuid" },
-        "kind": { "$ref": "#/$defs/image_source_kind" },
-        "url": {
-          "type": "string",
-          "description": "Stored normalised: lowercase host, no query, no trailing slash. That normalised form is duplicate check #1.",
-          "format": "uri"
-        },
-        "size_w": { "type": ["integer", "null"], "minimum": 320, "maximum": 12000 },
-        "size_h": { "type": ["integer", "null"], "minimum": 180, "maximum": 12000 },
-        "is_primary": {
-          "type": "boolean",
-          "description": "The URL the poller fetches and the map shows. At most one primary per camera."
-        },
-        "last_ok_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] }
-      },
-      "allOf": [
-        {
-          "description": "A primary source is a snapshot; a stream is never what the poller fetches.",
-          "if": { "properties": { "is_primary": { "const": true } }, "required": ["is_primary"] },
-          "then": { "properties": { "kind": { "const": "snapshot" } } }
-        }
-      ]
-    },
+		"camera_image_source": {
+			"type": "object",
+			"description": "One fetchable URL of a camera. A camera may have a snapshot and an HLS stream at once; exactly one row is the primary snapshot.",
+			"additionalProperties": false,
+			"required": ["id", "camera_id", "kind", "url", "is_primary"],
+			"properties": {
+				"id": { "$ref": "#/$defs/uuid" },
+				"camera_id": { "$ref": "#/$defs/uuid" },
+				"kind": { "$ref": "#/$defs/image_source_kind" },
+				"url": {
+					"type": "string",
+					"description": "Stored normalised: lowercase host, no query, no trailing slash. That normalised form is duplicate check #1.",
+					"format": "uri"
+				},
+				"size_w": { "type": ["integer", "null"], "minimum": 320, "maximum": 12000 },
+				"size_h": { "type": ["integer", "null"], "minimum": 180, "maximum": 12000 },
+				"is_primary": {
+					"type": "boolean",
+					"description": "The URL the poller fetches and the map shows. At most one primary per camera."
+				},
+				"last_ok_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] }
+			},
+			"allOf": [
+				{
+					"description": "A primary source is a snapshot; a stream is never what the poller fetches.",
+					"if": { "properties": { "is_primary": { "const": true } }, "required": ["is_primary"] },
+					"then": { "properties": { "kind": { "const": "snapshot" } } }
+				}
+			]
+		},
 
-    "category": {
-      "type": "object",
-      "description": "Dictionary row behind camera_categories. Windy filters by up to 10 categories with and/or semantics, so this stays a plain many-to-many.",
-      "additionalProperties": false,
-      "required": ["id", "slug", "name"],
-      "properties": {
-        "id": { "$ref": "#/$defs/uuid" },
-        "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "examples": ["weather", "traffic", "ski-resort", "city", "beach"] },
-        "name": { "type": "string", "minLength": 1, "maxLength": 60 },
-        "parent_id": { "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] }
-      }
-    },
+		"category": {
+			"type": "object",
+			"description": "Dictionary row behind camera_categories. Windy filters by up to 10 categories with and/or semantics, so this stays a plain many-to-many.",
+			"additionalProperties": false,
+			"required": ["id", "slug", "name"],
+			"properties": {
+				"id": { "$ref": "#/$defs/uuid" },
+				"slug": {
+					"type": "string",
+					"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+					"examples": ["weather", "traffic", "ski-resort", "city", "beach"]
+				},
+				"name": { "type": "string", "minLength": 1, "maxLength": 60 },
+				"parent_id": { "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] }
+			}
+		},
 
-    "camera_category": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["camera_id", "category_id"],
-      "properties": {
-        "camera_id": { "$ref": "#/$defs/uuid" },
-        "category_id": { "$ref": "#/$defs/uuid" }
-      }
-    },
+		"camera_category": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["camera_id", "category_id"],
+			"properties": {
+				"camera_id": { "$ref": "#/$defs/uuid" },
+				"category_id": { "$ref": "#/$defs/uuid" }
+			}
+		},
 
-    "frame": {
-      "type": "object",
-      "description": "One stored image. Bytes live in object storage, never in Postgres; the row carries the key and the hashes. `captured_at` is when the frame was taken (the poll start, or the Last-Modified when the provider gives one), not when the job finished.",
-      "additionalProperties": false,
-      "required": ["id", "camera_id", "captured_at", "storage_key", "sha256"],
-      "properties": {
-        "id": { "$ref": "#/$defs/uuid" },
-        "camera_id": { "$ref": "#/$defs/uuid" },
-        "image_source_id": { "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
-        "captured_at": { "$ref": "#/$defs/timestamp" },
-        "storage_key": {
-          "type": "string",
-          "description": "Object-storage key of the original. The same frame is deduped by sha256 per camera.",
-          "examples": ["cameras/0190f3c2/2026/11/01/1430.jpg"]
-        },
-        "thumbnail_key": { "type": ["string", "null"] },
-        "sha256": { "$ref": "#/$defs/sha256" },
-        "perceptual_hash": {
-          "type": ["string", "null"],
-          "description": "Near-duplicate hash, filled by the deferred processing pipeline. Null until then."
-        },
-        "width": { "type": ["integer", "null"], "minimum": 1 },
-        "height": { "type": ["integer", "null"], "minimum": 1 },
-        "bytes": { "type": ["integer", "null"], "minimum": 1 }
-      }
-    },
+		"frame": {
+			"type": "object",
+			"description": "One stored image. Bytes live in object storage, never in Postgres; the row carries the key and the hashes. `captured_at` is when the frame was taken (the poll start, or the Last-Modified when the provider gives one), not when the job finished.",
+			"additionalProperties": false,
+			"required": ["id", "camera_id", "captured_at", "storage_key", "sha256"],
+			"properties": {
+				"id": { "$ref": "#/$defs/uuid" },
+				"camera_id": { "$ref": "#/$defs/uuid" },
+				"image_source_id": { "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+				"captured_at": { "$ref": "#/$defs/timestamp" },
+				"storage_key": {
+					"type": "string",
+					"description": "Object-storage key of the original. The same frame is deduped by sha256 per camera.",
+					"examples": ["cameras/0190f3c2/2026/11/01/1430.jpg"]
+				},
+				"thumbnail_key": { "type": ["string", "null"] },
+				"sha256": { "$ref": "#/$defs/sha256" },
+				"perceptual_hash": {
+					"type": ["string", "null"],
+					"description": "Near-duplicate hash, filled by the deferred processing pipeline. Null until then."
+				},
+				"width": { "type": ["integer", "null"], "minimum": 1 },
+				"height": { "type": ["integer", "null"], "minimum": 1 },
+				"bytes": { "type": ["integer", "null"], "minimum": 1 }
+			}
+		},
 
-    "poll_attempt": {
-      "type": "object",
-      "description": "Append-only fetch log, pruned after 7 days. A test poll writes here too, outside the schedule. This table answers \"why is this camera stuck\".",
-      "additionalProperties": false,
-      "required": ["id", "camera_id", "started_at", "status"],
-      "properties": {
-        "id": { "$ref": "#/$defs/uuid" },
-        "camera_id": { "$ref": "#/$defs/uuid" },
-        "started_at": { "$ref": "#/$defs/timestamp" },
-        "duration_ms": { "type": ["integer", "null"], "minimum": 0 },
-        "status": { "$ref": "#/$defs/poll_status" },
-        "http_status": { "type": ["integer", "null"], "minimum": 100, "maximum": 599 },
-        "bytes": { "type": ["integer", "null"], "minimum": 0 },
-        "sha256": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
-        "error": { "type": ["string", "null"], "maxLength": 2000 },
-        "trigger": {
-          "type": "string",
-          "description": "schedule: the normal tick. test: the \"Test poll\" button. first: the poll queued at save, which is what turns unverified into active.",
-          "enum": ["schedule", "test", "first", "import"],
-          "default": "schedule"
-        }
-      }
-    },
+		"poll_attempt": {
+			"type": "object",
+			"description": "Append-only fetch log, pruned after 7 days. A test poll writes here too, outside the schedule. This table answers \"why is this camera stuck\".",
+			"additionalProperties": false,
+			"required": ["id", "camera_id", "started_at", "status"],
+			"properties": {
+				"id": { "$ref": "#/$defs/uuid" },
+				"camera_id": { "$ref": "#/$defs/uuid" },
+				"started_at": { "$ref": "#/$defs/timestamp" },
+				"duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+				"status": { "$ref": "#/$defs/poll_status" },
+				"http_status": { "type": ["integer", "null"], "minimum": 100, "maximum": 599 },
+				"bytes": { "type": ["integer", "null"], "minimum": 0 },
+				"sha256": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+				"error": { "type": ["string", "null"], "maxLength": 2000 },
+				"trigger": {
+					"type": "string",
+					"description": "schedule: the normal tick. test: the \"Test poll\" button. first: the poll queued at save, which is what turns unverified into active.",
+					"enum": ["schedule", "test", "first", "import"],
+					"default": "schedule"
+				}
+			}
+		},
 
-    "camera_import_run": {
-      "type": "object",
-      "description": "One bulk import against a catalogue. Every import writes one, so \"what changed last night\" is answerable. A dry run writes nothing but still records the diff.",
-      "additionalProperties": false,
-      "required": ["id", "source_id", "started_at", "dry_run", "added", "updated", "unchanged", "removed"],
-      "properties": {
-        "id": { "$ref": "#/$defs/uuid" },
-        "source_id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        "started_at": { "$ref": "#/$defs/timestamp" },
-        "finished_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
-        "dry_run": { "type": "boolean" },
-        "added": { "type": "integer", "minimum": 0 },
-        "updated": { "type": "integer", "minimum": 0 },
-        "unchanged": { "type": "integer", "minimum": 0 },
-        "removed": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Counted, never applied: a camera missing from the listing becomes paused with paused_reason = missing_from_source and the operator decides."
-        },
-        "errors": {
-          "type": "array",
-          "description": "Per-row failures, kept raw so the diff can be replayed.",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["provider_camera_ref", "message"],
-            "properties": {
-              "provider_camera_ref": { "type": ["string", "null"] },
-              "message": { "type": "string", "maxLength": 2000 }
-            }
-          }
-        },
-        "created_by": { "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] }
-      }
-    },
+		"camera_import_run": {
+			"type": "object",
+			"description": "One bulk import against a catalogue. Every import writes one, so \"what changed last night\" is answerable. A dry run writes nothing but still records the diff.",
+			"additionalProperties": false,
+			"required": [
+				"id",
+				"source_id",
+				"started_at",
+				"dry_run",
+				"added",
+				"updated",
+				"unchanged",
+				"removed"
+			],
+			"properties": {
+				"id": { "$ref": "#/$defs/uuid" },
+				"source_id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+				"started_at": { "$ref": "#/$defs/timestamp" },
+				"finished_at": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
+				"dry_run": { "type": "boolean" },
+				"added": { "type": "integer", "minimum": 0 },
+				"updated": { "type": "integer", "minimum": 0 },
+				"unchanged": { "type": "integer", "minimum": 0 },
+				"removed": {
+					"type": "integer",
+					"minimum": 0,
+					"description": "Counted, never applied: a camera missing from the listing becomes paused with paused_reason = missing_from_source and the operator decides."
+				},
+				"errors": {
+					"type": "array",
+					"description": "Per-row failures, kept raw so the diff can be replayed.",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["provider_camera_ref", "message"],
+						"properties": {
+							"provider_camera_ref": { "type": ["string", "null"] },
+							"message": { "type": "string", "maxLength": 2000 }
+						}
+					}
+				},
+				"created_by": { "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] }
+			}
+		},
 
-    "probe_report": {
-      "type": "object",
-      "description": "Response of POST /admin/cameras/probe. Not a table: it is the contract between the probe and the add-camera form, and it is what a saved camera's last_probe_* columns are copied from.",
-      "additionalProperties": false,
-      "required": ["status", "input_url"],
-      "properties": {
-        "status": { "$ref": "#/$defs/probe_status" },
-        "input_url": { "type": "string", "format": "uri" },
-        "final_url": {
-          "type": ["string", "null"],
-          "format": "uri",
-          "description": "After at most 2 redirects. The SSRF check runs again after each hop."
-        },
-        "http_status": { "type": ["integer", "null"], "minimum": 100, "maximum": 599 },
-        "content_type": { "type": ["string", "null"] },
-        "bytes": { "type": ["integer", "null"], "minimum": 0 },
-        "width": { "type": ["integer", "null"], "minimum": 0 },
-        "height": { "type": ["integer", "null"], "minimum": 0 },
-        "duration_ms": { "type": ["integer", "null"], "minimum": 0 },
-        "etag": { "type": ["string", "null"] },
-        "last_modified": { "type": ["string", "null"] },
-        "cache_control": { "type": ["string", "null"] },
-        "age_s": { "type": ["integer", "null"], "minimum": 0 },
-        "suggested_interval_s": {
-          "type": ["integer", "null"],
-          "description": "From the two-probe comparison: 60 when bytes or validators changed, max-age clamped to 600..3600 when nothing changed and a cache header exists, otherwise 600. Never below 60.",
-          "minimum": 60,
-          "maximum": 3600
-        },
-        "suggestion_reason": {
-          "type": ["string", "null"],
-          "examples": ["bytes changed after 60 s", "unchanged after 60 s, Cache-Control: max-age=600", "unchanged after 60 s"]
-        },
-        "candidates": {
-          "type": "array",
-          "description": "Filled only when the input was a page URL. Ordered by the discovery steps in docs/research/data/url-patterns.json.",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["url", "discovered_by"],
-            "properties": {
-              "url": { "type": "string", "format": "uri" },
-              "discovered_by": {
-                "type": "string",
-                "enum": ["og:image", "twitter:image", "json-ld", "img-candidate", "meta-refresh", "iframe", "vendor-pattern"]
-              },
-              "width": { "type": ["integer", "null"], "minimum": 0 },
-              "height": { "type": ["integer", "null"], "minimum": 0 }
-            }
-          }
-        },
-        "duplicate_of_camera_id": {
-          "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }],
-          "description": "Set when the frame matches another camera (same normalised URL, same source+ref, or the same sha256). Cases 1-3 block the save, cases 4-5 only warn."
-        },
-        "message": {
-          "type": ["string", "null"],
-          "description": "The exact operator-facing text for a failed probe, e.g. \"This URL returns a web page, not an image. Paste the image URL or let the probe search the page.\""
-        }
-      }
-    }
-  }
+		"probe_report": {
+			"type": "object",
+			"description": "Response of POST /admin/cameras/probe. Not a table: it is the contract between the probe and the add-camera form, and it is what a saved camera's last_probe_* columns are copied from.",
+			"additionalProperties": false,
+			"required": ["status", "input_url"],
+			"properties": {
+				"status": { "$ref": "#/$defs/probe_status" },
+				"input_url": { "type": "string", "format": "uri" },
+				"final_url": {
+					"type": ["string", "null"],
+					"format": "uri",
+					"description": "After at most 2 redirects. The SSRF check runs again after each hop."
+				},
+				"http_status": { "type": ["integer", "null"], "minimum": 100, "maximum": 599 },
+				"content_type": { "type": ["string", "null"] },
+				"bytes": { "type": ["integer", "null"], "minimum": 0 },
+				"width": { "type": ["integer", "null"], "minimum": 0 },
+				"height": { "type": ["integer", "null"], "minimum": 0 },
+				"duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+				"etag": { "type": ["string", "null"] },
+				"last_modified": { "type": ["string", "null"] },
+				"cache_control": { "type": ["string", "null"] },
+				"age_s": { "type": ["integer", "null"], "minimum": 0 },
+				"suggested_interval_s": {
+					"type": ["integer", "null"],
+					"description": "From the two-probe comparison: 60 when bytes or validators changed, max-age clamped to 600..3600 when nothing changed and a cache header exists, otherwise 600. Never below 60.",
+					"minimum": 60,
+					"maximum": 3600
+				},
+				"suggestion_reason": {
+					"type": ["string", "null"],
+					"examples": [
+						"bytes changed after 60 s",
+						"unchanged after 60 s, Cache-Control: max-age=600",
+						"unchanged after 60 s"
+					]
+				},
+				"candidates": {
+					"type": "array",
+					"description": "Filled only when the input was a page URL. Ordered by the discovery steps in docs/research/data/url-patterns.json.",
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["url", "discovered_by"],
+						"properties": {
+							"url": { "type": "string", "format": "uri" },
+							"discovered_by": {
+								"type": "string",
+								"enum": [
+									"og:image",
+									"twitter:image",
+									"json-ld",
+									"img-candidate",
+									"meta-refresh",
+									"iframe",
+									"vendor-pattern"
+								]
+							},
+							"width": { "type": ["integer", "null"], "minimum": 0 },
+							"height": { "type": ["integer", "null"], "minimum": 0 }
+						}
+					}
+				},
+				"duplicate_of_camera_id": {
+					"anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }],
+					"description": "Set when the frame matches another camera (same normalised URL, same source+ref, or the same sha256). Cases 1-3 block the save, cases 4-5 only warn."
+				},
+				"message": {
+					"type": ["string", "null"],
+					"description": "The exact operator-facing text for a failed probe, e.g. \"This URL returns a web page, not an image. Paste the image URL or let the probe search the page.\""
+				}
+			}
+		}
+	}
 }

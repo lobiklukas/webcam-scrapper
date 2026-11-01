@@ -16,6 +16,9 @@ export default defineConfig({
 			adapter: adapter()
 		})
 	],
+	// `@lucide/svelte` ships uncompiled Svelte; pre-bundled in the test runner the icons get a
+	// second Svelte runtime and rendering one fails with "Cannot read properties of undefined".
+	optimizeDeps: { exclude: ['@lucide/svelte'] },
 	test: {
 		expect: { requireAssertions: true },
 		projects: [

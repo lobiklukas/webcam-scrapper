@@ -2,7 +2,7 @@ import { StandardSchemaValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { TestingModule } from '@nestjs/testing';
-import { webcamListItemDto } from '@webcam-scrapper/contracts/dto';
+import { framePreviewDto, webcamListItemDto } from '@webcam-scrapper/contracts/dto';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { AppModule } from '../src/app.module.js';
@@ -45,6 +45,32 @@ describe('frames (e2e)', () => {
 
 	it('rejects an id that is not a uuid', async () => {
 		await request(app.getHttpServer()).get('/api/frames/abc').expect(400);
+	});
+
+	it('lists the frames of a camera oldest first', async () => {
+		const list = await request(app.getHttpServer()).get('/api/webcams?limit=50').expect(200);
+		const preview = webcamListItemDto
+			.array()
+			.parse(list.body)
+			.find((location) => location.frame);
+
+		if (!preview?.cam || !preview.frame) return;
+
+		const response = await request(app.getHttpServer())
+			.get(`/api/frames?camId=${preview.cam.id}`)
+			.expect(200);
+		const frames = framePreviewDto.array().parse(response.body);
+
+		expect(frames.map((entry) => entry.id)).toContain(preview.frame.id);
+		expect(frames.map((entry) => entry.capturedAt)).toEqual(
+			frames.map((entry) => entry.capturedAt).toSorted()
+		);
+	});
+
+	it('rejects a camera id that is not a positive integer', async () => {
+		await request(app.getHttpServer()).get('/api/frames?camId=abc').expect(400);
+		await request(app.getHttpServer()).get('/api/frames?camId=0').expect(400);
+		await request(app.getHttpServer()).get('/api/frames').expect(400);
 	});
 
 	it('answers 404 for a frame that does not exist', async () => {

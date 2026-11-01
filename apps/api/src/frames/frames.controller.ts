@@ -1,7 +1,13 @@
-import { Controller, Get, Header, Param, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Header, Param, Query, StreamableFile } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
-import { frameIdParamDto } from '@webcam-scrapper/contracts/dto';
+import {
+	frameIdParamDto,
+	framePreviewDto,
+	listFramesQueryDto,
+	type FramePreviewDto,
+	type ListFramesQuery
+} from '@webcam-scrapper/contracts/dto';
 // Value import: `emitDecoratorMetadata` needs the class at runtime for constructor injection.
 // oxlint-disable-next-line typescript/consistent-type-imports
 import { FramesService } from './frames.service.js';
@@ -15,6 +21,16 @@ import { FramesService } from './frames.service.js';
 @Controller('api/frames')
 export class FramesController {
 	constructor(private readonly frames: FramesService) {}
+
+	@Get()
+	@ApiOkResponse({
+		standardSchema: framePreviewDto,
+		isArray: true,
+		description: 'Frames of one camera inside a window, oldest first.'
+	})
+	list(@Query({ schema: listFramesQueryDto }) query: ListFramesQuery): Promise<FramePreviewDto[]> {
+		return this.frames.list(query);
+	}
 
 	@Get(':id')
 	@Header('Cache-Control', 'public, max-age=31536000, immutable')

@@ -1,7 +1,12 @@
 import type { Readable } from 'node:stream';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { and, desc, eq, gte, lte } from 'drizzle-orm';
 import { frame } from '@webcam-scrapper/db';
+import {
+	framePath,
+	type FramePreviewDto,
+	type ListFramesQuery
+} from '@webcam-scrapper/contracts/dto';
 import { DB, type AppDatabase } from '../db/db.js';
 import { ObjectNotFoundError, type ObjectStorage } from './frames.storage.js';
 
@@ -42,5 +47,38 @@ export class FramesService {
 
 			throw error;
 		}
+	}
+
+	/**
+	 * The frames of one camera inside a window, oldest first. The cap takes the newest frames of the
+	 * window and the result is reversed, so a camera with more frames than `limit` still plays its
+	 * most recent run instead of stopping early in the past.
+	 */
+	async list({ camId, from, to, limit }: ListFramesQuery): Promise<FramePreviewDto[]> {
+		const rows = await this.db
+			.select({
+				id: frame.id,
+				capturedAt: frame.capturedAt,
+				contentType: frame.contentType,
+				bytes: frame.bytes
+			})
+			.from(frame)
+			.where(
+				and(
+					eq(frame.camId, camId),
+					from ? gte(frame.capturedAt, new Date(from)) : undefined,
+					to ? lte(frame.capturedAt, new Date(to)) : undefined
+				)
+			)
+			.orderBy(desc(frame.capturedAt))
+			.limit(limit);
+
+		return rows.reverse().map((row) => ({
+			id: row.id,
+			capturedAt: row.capturedAt.toISOString(),
+			contentType: row.contentType,
+			bytes: row.bytes,
+			url: framePath(row.id)
+		}));
 	}
 }

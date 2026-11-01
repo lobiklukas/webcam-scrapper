@@ -107,6 +107,34 @@ export type WebcamsControllerFindOneResponses = {
 export type WebcamsControllerFindOneResponse =
 	WebcamsControllerFindOneResponses[keyof WebcamsControllerFindOneResponses];
 
+export type FramesControllerListData = {
+	body?: never;
+	path?: never;
+	query: {
+		camId: number;
+		from?: string;
+		to?: string;
+		limit?: number;
+	};
+	url: '/api/frames';
+};
+
+export type FramesControllerListResponses = {
+	/**
+	 * Frames of one camera inside a window, oldest first.
+	 */
+	200: Array<{
+		id: string;
+		capturedAt: string;
+		contentType: string;
+		bytes: number;
+		url: string;
+	}>;
+};
+
+export type FramesControllerListResponse =
+	FramesControllerListResponses[keyof FramesControllerListResponses];
+
 export type FramesControllerFindOneData = {
 	body?: never;
 	path: {

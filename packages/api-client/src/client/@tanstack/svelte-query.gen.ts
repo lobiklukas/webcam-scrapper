@@ -10,6 +10,7 @@ import {
 import { client } from '../client.gen.js';
 import {
 	framesControllerFindOne,
+	framesControllerList,
 	healthControllerCheck,
 	type Options,
 	webcamsControllerFindOne,
@@ -17,6 +18,8 @@ import {
 } from '../sdk.gen.js';
 import type {
 	FramesControllerFindOneData,
+	FramesControllerListData,
+	FramesControllerListResponse,
 	HealthControllerCheckData,
 	HealthControllerCheckResponse,
 	WebcamsControllerFindOneData,
@@ -208,6 +211,28 @@ export const webcamsControllerFindOneOptions = (options: Options<WebcamsControll
 			return data;
 		},
 		queryKey: webcamsControllerFindOneQueryKey(options)
+	});
+
+export const framesControllerListQueryKey = (options: Options<FramesControllerListData>) =>
+	createQueryKey('framesControllerList', options);
+
+export const framesControllerListOptions = (options: Options<FramesControllerListData>) =>
+	queryOptions<
+		FramesControllerListResponse,
+		DefaultError,
+		FramesControllerListResponse,
+		ReturnType<typeof framesControllerListQueryKey>
+	>({
+		queryFn: async ({ queryKey, signal }) => {
+			const { data } = await framesControllerList({
+				...options,
+				...queryKey[0],
+				signal,
+				throwOnError: true
+			});
+			return data;
+		},
+		queryKey: framesControllerListQueryKey(options)
 	});
 
 export const framesControllerFindOneQueryKey = (options: Options<FramesControllerFindOneData>) =>

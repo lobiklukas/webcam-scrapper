@@ -12,6 +12,7 @@ endpoint; the raw output is in [`data/probe-log.tsv`](data/probe-log.tsv).
 | [`02-camera-sources.md`](02-camera-sources.md) | you need a camera to put in the database, or you are deciding which provider to ingest |
 | [`03-camera-management.md`](03-camera-management.md) | you build the admin screens where a user adds and maintains a camera |
 | [`04-ingestion-strategy.md`](04-ingestion-strategy.md) | you build the poller, adapters, dedupe, retention or the deferred image pipeline |
+| [`05-image-analysis.md`](05-image-analysis.md) | you build an analysis step in `apps/image-processor`: what to compute, what it costs on CPU, what it fails on, and which analyses are not worth building |
 | [`data/sources.json`](data/sources.json) | machine-readable registry of the verified sources |
 | [`data/scraper-sources.json`](data/scraper-sources.json) | you are writing a scraper: one flat entry per source, nothing else |
 | [`data/url-patterns.json`](data/url-patterns.json) | URL templates to try when a user pastes a camera URL or a camera page |
@@ -42,6 +43,9 @@ endpoint; the raw output is in [`data/probe-log.tsv`](data/probe-log.tsv).
   map picker for coordinates, duplicate detection, a state machine
   (`unverified → active → paused → retired`), a test-poll button, and a per-camera poll log.
   Details in `03-camera-management.md`.
+- Image analysis has one rule that decides most of it: at 500 cameras and a 60 s interval the fleet
+  is 8.3 frames/s, so anything above ~50 ms per frame is sampled and anything above ~500 ms is
+  event-gated. Details, costs and the build order in `05-image-analysis.md`.
 
 ## How to re-run the probes
 
@@ -60,5 +64,6 @@ curl -sS -L --compressed -A "Mozilla/5.0" -o /dev/null \
 - Windy's forecast APIs, map rendering and mobile apps. Only the webcam part.
 - Authentication and accounts for the clone. The management UI assumes a single admin or a
   simple role check.
-- The image processing pipeline beyond storage and resize. It is listed as deferred work in
-  `04-ingestion-strategy.md`.
+- The vision-language caption step, timelapse encoding and the pipeline/step editor: `05` says what
+  they cost and whether they are worth building, not how to wire them. Capture, dedupe and retention
+  stay in `04`.

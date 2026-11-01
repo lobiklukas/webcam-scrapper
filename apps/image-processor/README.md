@@ -40,3 +40,5 @@ structured result per step with confidence, duration and model metadata. No data
 no Redis here — it reads and writes object storage and nothing else.
 
 Activated by: WL-137 (scaffold), WL-136 (contract), WL-135/138/139 (steps), WL-141 (container).
+What each step should compute, what it costs on CPU and what is not worth building is decided in
+[`docs/research/05-image-analysis.md`](../../docs/research/05-image-analysis.md).
