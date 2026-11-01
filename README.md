@@ -9,6 +9,8 @@ Monorepo for a webcam map with a management UI. The research that drives the pro
 apps/
   web/    SvelteKit 3 app: map, player, camera management UI (adapter-node)
   api/    Nest 12 app: camera registry, read API, ingestion, auth + Postgres (health + config + Swagger today)
+  worker/ scrape worker (plain Node + tsx): polls due cams, stores frames, publishes to RabbitMQ
+  image-processor/  Python FastAPI image analysis service (uv + ruff), scaffolded with /health only
 packages/
   db/          drizzle schema (incl. the generated better-auth tables), client factory, migrations
   contracts/   zod DTOs for the REST surface, plus the generated openapi.json
@@ -28,6 +30,7 @@ so the browser only ever sees the web origin (see [Auth and the API hop](#auth-a
 | Node   | >= 24                           | both apps                       |
 | pnpm   | 12.x (`packageManager` pins it) | installs and runs the workspace |
 | Docker | any                             | local Postgres (`compose.yaml`) |
+| uv     | any                             | only for `apps/image-processor` |
 
 ## Commands
 

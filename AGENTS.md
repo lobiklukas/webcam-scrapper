@@ -5,16 +5,17 @@ Nest API. Read this before changing anything.
 
 ## Repo map
 
-| Path                  | What it is                                                                                      |
-| --------------------- | ----------------------------------------------------------------------------------------------- |
-| `apps/web`            | SvelteKit 3 app (Svelte 5, Tailwind 4, adapter-node). No DB, no auth of its own                 |
-| `apps/api`            | Nest 12 app (health, config, Swagger, better-auth, drizzle client, Postgres)                    |
-| `apps/worker`         | scrape worker: plain Node + tsx, no Nest; claims due cams, stores frames, publishes to RabbitMQ |
-| `packages/db`         | drizzle schema (incl. generated better-auth tables), client factory, migrations                 |
-| `packages/contracts`  | zod DTOs shared by api and web + the generated `openapi.json`                                   |
-| `packages/api-client` | generated fetch client, SDK and TanStack Query options for the web app                          |
-| `scripts`             | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts into Postgres                   |
-| `docs/research`       | Product research: Windy teardown, camera sources, management flows, ingestion                   |
+| Path                   | What it is                                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| `apps/web`             | SvelteKit 3 app (Svelte 5, Tailwind 4, adapter-node). No DB, no auth of its own                  |
+| `apps/api`             | Nest 12 app (health, config, Swagger, better-auth, drizzle client, Postgres)                     |
+| `apps/worker`          | scrape worker: plain Node + tsx, no Nest; claims due cams, stores frames, publishes to RabbitMQ  |
+| `apps/image-processor` | Python FastAPI service (uv, ruff): image analysis, scaffolded with `GET /health` only, port 8000 |
+| `packages/db`          | drizzle schema (incl. generated better-auth tables), client factory, migrations                  |
+| `packages/contracts`   | zod DTOs shared by api and web + the generated `openapi.json`                                    |
+| `packages/api-client`  | generated fetch client, SDK and TanStack Query options for the web app                           |
+| `scripts`              | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts into Postgres                    |
+| `docs/research`        | Product research: Windy teardown, camera sources, management flows, ingestion                    |
 
 ## Commands (always from the repo root)
 
@@ -89,6 +90,13 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
   `dist`.
 - **The web app owns port 5173, the API owns 3000.** `adapter-node` defaults to 3000, hence the
   `PORT` in `apps/web/.env`; keep that in mind before adding any other server.
+- **`apps/image-processor` is Python and outside pnpm, turbo and oxlint.** `uv` owns the
+  environment (`pyproject.toml`, `uv.lock`, `.python-version` = 3.12), `ruff` owns lint and format
+  with its settings in that `pyproject.toml`. Root `pnpm lint` / `pnpm fmt` / `pnpm test` deliberately
+  skip it: run `uv run ruff check .`, `uv run ruff format .` and `uv run pytest` in that directory.
+  It has `app/` (`main.py` with `create_app()`) and `tests/` today; `processors/`, `pipelines/`,
+  `models/` and `services/` arrive with the steps. Port 8000, no database, no Redis — it reads and
+  writes object storage and nothing else, and no repo code calls it yet.
 - **Lint/format are repo-level, not per-package.** `oxlint` and `oxfmt` run once over the tree from
   the root; do not add per-app `lint` scripts or Turbo tasks for them.
 - **Config locations:** `.oxlintrc.json` (root, shared) extended by `apps/web/.oxlintrc.json` and

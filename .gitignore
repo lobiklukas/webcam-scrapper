@@ -11,6 +11,13 @@ build
 .svelte-kit
 .turbo
 
+# Python (apps/image-processor)
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+
 # Build metadata
 *.tsbuildinfo
 
