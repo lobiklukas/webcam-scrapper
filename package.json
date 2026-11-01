@@ -18,7 +18,8 @@
 		"db:generate": "pnpm --filter @webcam-scrapper/db db:generate",
 		"db:migrate": "pnpm --filter @webcam-scrapper/db db:migrate",
 		"db:studio": "pnpm --filter @webcam-scrapper/db db:studio",
-		"auth:schema": "pnpm --filter @webcam-scrapper/db auth:schema"
+		"auth:schema": "pnpm --filter @webcam-scrapper/db auth:schema",
+		"seed": "turbo run seed"
 	},
 	"devDependencies": {
 		"@rsvelte/oxlint-plugin": "catalog:",

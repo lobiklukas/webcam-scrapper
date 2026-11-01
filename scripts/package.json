@@ -1,0 +1,19 @@
+{
+	"name": "@webcam-scrapper/scripts",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"seed": "tsx --env-file-if-exists=../packages/db/.env seed.ts",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@webcam-scrapper/db": "workspace:",
+		"drizzle-orm": "^0.45.2"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:"
+	}
+}

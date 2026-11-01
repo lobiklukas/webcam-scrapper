@@ -24,6 +24,11 @@
 			"cache": false,
 			"persistent": true
 		},
+		"seed": {
+			"dependsOn": ["^build"],
+			"cache": false,
+			"passThroughEnv": ["DATABASE_URL"]
+		},
 		"start": {
 			"dependsOn": ["build"],
 			"cache": false,

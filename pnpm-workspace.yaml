@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - scripts
 
 # pnpm 12 does not run dependency lifecycle scripts unless they are allowed here.
 allowBuilds:
@@ -20,6 +21,7 @@ catalog:
   oxfmt: ^0.75.0
   oxlint: ^1.90.0
   oxlint-tsgolint: ^7.0.2005
+  tsx: ^4.23.15
   turbo: ^2.11.10
   typescript: ^6.0.3
   vite: ^8.3.0

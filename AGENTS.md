@@ -11,6 +11,7 @@ Nest API. Read this before changing anything.
 | `apps/api`           | Nest 12 app (health, config, Swagger, better-auth, drizzle client, Postgres)    |
 | `packages/db`        | drizzle schema (incl. generated better-auth tables), client factory, migrations |
 | `packages/contracts` | reserved: DTOs, socket events, job payloads                                     |
+| `scripts`            | one-off `.ts` tooling run with `tsx` (no build); `seed` upserts into Postgres   |
 | `docs/research`      | Product research: Windy teardown, camera sources, management flows, ingestion   |
 
 ## Commands (always from the repo root)
@@ -25,6 +26,7 @@ pnpm build       # nest build + vite build (adapter-node)
 pnpm db:start    # docker compose up (Postgres 5432, root compose.yaml)
 pnpm db:push     # apply packages/db schema (db:generate / db:migrate for SQL)
 pnpm auth:schema # regenerate packages/db/src/schema/auth.ts, then run pnpm fmt
+pnpm seed        # upsert the Digitraffic catalogue into location/cam (needs DATABASE_URL)
 ```
 
 Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/formatting is
@@ -70,6 +72,10 @@ Never add `eslint`, `prettier`, `npm install`, or `bun` instructions: linting/fo
   `"catalog:"`, never by pasting a version into an app.
 - **pnpm 12 does not run dependency build scripts** unless allowed in `allowBuilds` in
   `pnpm-workspace.yaml`. If a native package misbehaves after install, look there first.
+- **`scripts` runs from source with `tsx`, but consumes `packages/db` through its `dist`.** That is
+  why `seed` is a Turbo task with `dependsOn: ["^build"]` rather than a plain pnpm script, and why
+  `DATABASE_URL` sits in its `passThroughEnv`: `DATABASE_URL=… pnpm seed` overrides the
+  `packages/db/.env` the script loads by default.
 
 ## Conventions
 
