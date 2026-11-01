@@ -1,11 +1,11 @@
 <script lang="ts">
-	import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
-	import PlusIcon from "@lucide/svelte/icons/plus";
-	import * as DropdownMenu from "#lib/components/ui/dropdown-menu/index.js";
-	import * as Sidebar from "#lib/components/ui/sidebar/index.js";
+	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
+	import PlusIcon from '@lucide/svelte/icons/plus';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
 
 	let {
-		teams,
+		teams
 	}: {
 		teams: {
 			name: string;

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import * as Sidebar from "#lib/components/ui/sidebar/index.js";
-	import type { Component } from "svelte";
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
+	import type { Component } from 'svelte';
 
 	let {
-		items,
+		items
 	}: {
 		items: {
 			title: string;

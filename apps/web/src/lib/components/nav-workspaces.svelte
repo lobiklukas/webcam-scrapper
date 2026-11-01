@@ -1,12 +1,12 @@
 <script lang="ts">
-	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
-	import EllipsisIcon from "@lucide/svelte/icons/ellipsis";
-	import PlusIcon from "@lucide/svelte/icons/plus";
-	import * as Collapsible from "#lib/components/ui/collapsible/index.js";
-	import * as Sidebar from "#lib/components/ui/sidebar/index.js";
+	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
+	import PlusIcon from '@lucide/svelte/icons/plus';
+	import * as Collapsible from '#lib/components/ui/collapsible/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
 
 	let {
-		workspaces,
+		workspaces
 	}: {
 		workspaces: {
 			name: string;

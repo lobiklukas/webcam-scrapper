@@ -1,89 +1,89 @@
 <script lang="ts" module>
-	import ArrowDownIcon from "@lucide/svelte/icons/arrow-down";
-	import ArrowUpIcon from "@lucide/svelte/icons/arrow-up";
-	import BellIcon from "@lucide/svelte/icons/bell";
-	import ChartLineIcon from "@lucide/svelte/icons/chart-line";
-	import CopyIcon from "@lucide/svelte/icons/copy";
-	import CornerUpLeftIcon from "@lucide/svelte/icons/corner-up-left";
-	import CornerUpRightIcon from "@lucide/svelte/icons/corner-up-right";
-	import FileTextIcon from "@lucide/svelte/icons/file-text";
-	import GalleryVerticalEndIcon from "@lucide/svelte/icons/gallery-vertical-end";
-	import LinkIcon from "@lucide/svelte/icons/link";
-	import Settings2Icon from "@lucide/svelte/icons/settings-2";
-	import TrashIcon from "@lucide/svelte/icons/trash";
-	import Trash2Icon from "@lucide/svelte/icons/trash-2";
+	import ArrowDownIcon from '@lucide/svelte/icons/arrow-down';
+	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
+	import BellIcon from '@lucide/svelte/icons/bell';
+	import ChartLineIcon from '@lucide/svelte/icons/chart-line';
+	import CopyIcon from '@lucide/svelte/icons/copy';
+	import CornerUpLeftIcon from '@lucide/svelte/icons/corner-up-left';
+	import CornerUpRightIcon from '@lucide/svelte/icons/corner-up-right';
+	import FileTextIcon from '@lucide/svelte/icons/file-text';
+	import GalleryVerticalEndIcon from '@lucide/svelte/icons/gallery-vertical-end';
+	import LinkIcon from '@lucide/svelte/icons/link';
+	import Settings2Icon from '@lucide/svelte/icons/settings-2';
+	import TrashIcon from '@lucide/svelte/icons/trash';
+	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
 	const data = [
 		[
 			{
-				label: "Customize Page",
-				icon: Settings2Icon,
+				label: 'Customize Page',
+				icon: Settings2Icon
 			},
 			{
-				label: "Turn into wiki",
-				icon: FileTextIcon,
-			},
+				label: 'Turn into wiki',
+				icon: FileTextIcon
+			}
 		],
 		[
 			{
-				label: "Copy Link",
-				icon: LinkIcon,
+				label: 'Copy Link',
+				icon: LinkIcon
 			},
 			{
-				label: "Duplicate",
-				icon: CopyIcon,
+				label: 'Duplicate',
+				icon: CopyIcon
 			},
 			{
-				label: "Move to",
-				icon: CornerUpRightIcon,
+				label: 'Move to',
+				icon: CornerUpRightIcon
 			},
 			{
-				label: "Move to Trash",
-				icon: Trash2Icon,
-			},
+				label: 'Move to Trash',
+				icon: Trash2Icon
+			}
 		],
 		[
 			{
-				label: "Undo",
-				icon: CornerUpLeftIcon,
+				label: 'Undo',
+				icon: CornerUpLeftIcon
 			},
 			{
-				label: "View analytics",
-				icon: ChartLineIcon,
+				label: 'View analytics',
+				icon: ChartLineIcon
 			},
 			{
-				label: "Version History",
-				icon: GalleryVerticalEndIcon,
+				label: 'Version History',
+				icon: GalleryVerticalEndIcon
 			},
 			{
-				label: "Show delete pages",
-				icon: TrashIcon,
+				label: 'Show delete pages',
+				icon: TrashIcon
 			},
 			{
-				label: "Notifications",
-				icon: BellIcon,
-			},
+				label: 'Notifications',
+				icon: BellIcon
+			}
 		],
 		[
 			{
-				label: "Import",
-				icon: ArrowUpIcon,
+				label: 'Import',
+				icon: ArrowUpIcon
 			},
 			{
-				label: "Export",
-				icon: ArrowDownIcon,
-			},
-		],
+				label: 'Export',
+				icon: ArrowDownIcon
+			}
+		]
 	];
 </script>
 
 <script lang="ts">
-	import EllipsisIcon from "@lucide/svelte/icons/ellipsis";
-	import StarIcon from "@lucide/svelte/icons/star";
-	import { untrack } from "svelte";
-	import * as Popover from "#lib/components/ui/popover/index.js";
-	import * as Sidebar from "#lib/components/ui/sidebar/index.js";
-	import { Button } from "#lib/components/ui/button/index.js";
+	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
+	import StarIcon from '@lucide/svelte/icons/star';
+	import { untrack } from 'svelte';
+	import * as Popover from '#lib/components/ui/popover/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
 
 	let open = $state(false);
 
