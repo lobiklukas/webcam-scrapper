@@ -1,0 +1,67 @@
+[
+  {
+    "id": "digitraffic-fi",
+    "name": "Fintraffic Digitraffic weather cameras",
+    "region": "FI",
+    "listingUrl": "https://tie.digitraffic.fi/api/weathercam/v1/stations",
+    "imageUrl": "https://weathercam.digitraffic.fi/{id}.jpg",
+    "cameraCount": 2273,
+    "cadenceSeconds": 600,
+    "license": "CC BY 4.0",
+    "attribution": "Fintraffic / Digitraffic",
+    "headers": { "Digitraffic-User": "windy-clone" },
+    "notes": "GeoJSON. One station has many presets; {id} is the preset id (C0150301), not the station id. 406 without Accept-Encoding: gzip."
+  },
+  {
+    "id": "caltrans-cwwp2",
+    "name": "Caltrans CWWP2 CCTV",
+    "region": "US-CA",
+    "listingUrl": "https://cwwp2.dot.ca.gov/data/d{district}/cctv/cctvStatusD{district:02}.json",
+    "imageUrl": null,
+    "cameraCount": 3610,
+    "cadenceSeconds": 60,
+    "license": "Caltrans fair use",
+    "attribution": "Caltrans",
+    "headers": {},
+    "notes": "One file per district 1-12, zero padded. Image URL is per camera in data[].cctv.imageData.static.currentImageURL; skip inService == \"false\"."
+  },
+  {
+    "id": "tfl-jamcams",
+    "name": "TfL JamCams",
+    "region": "GB-LON",
+    "listingUrl": "https://api.tfl.gov.uk/Place/Type/JamCam",
+    "imageUrl": "https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/{id}.jpg",
+    "cameraCount": 890,
+    "cadenceSeconds": 60,
+    "license": "TfL open data",
+    "attribution": "Powered by TfL Open Data",
+    "headers": {},
+    "notes": "Values are {key, value} pairs in additionalProperties[]. {id} is the numeric part of id, e.g. 00002.00865. 831 of 890 are available."
+  },
+  {
+    "id": "foto-webcam-eu",
+    "name": "foto-webcam.eu",
+    "region": "AT,DE,CH,IT",
+    "listingUrl": "https://www.foto-webcam.eu/",
+    "imageUrl": "https://www.foto-webcam.eu/webcam/{id}/current/1200.jpg",
+    "cameraCount": 309,
+    "cadenceSeconds": 600,
+    "license": "Embedding allowed with a link back",
+    "attribution": "foto-webcam.eu",
+    "headers": {},
+    "notes": "HTML index page, no API. {id} is the name in /webcam/{id}/current/400.jpg. Unknown names answer 404 text/html, so check content-type."
+  },
+  {
+    "id": "panomax",
+    "name": "PANOMAX panoramas",
+    "region": "worldwide",
+    "listingUrl": "https://api.panomax.com/1.0/cams/{id}/images/day",
+    "imageUrl": null,
+    "cameraCount": null,
+    "cadenceSeconds": 600,
+    "license": "per camera",
+    "attribution": "PANOMAX",
+    "headers": {},
+    "notes": "No list endpoint, ids come from panomax.com. The day listing gives a slot every 10 minutes and tile dimensions, not image URLs. Tiled panoramas."
+  }
+]
