@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+build
+.output
+.vercel
+.netlify
+.wrangler
+.svelte-kit
+.turbo
+
+# Build metadata
+*.tsbuildinfo
+
+# Tests
+coverage
+playwright-report
+test-results
+
+# DB
+drizzle
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*

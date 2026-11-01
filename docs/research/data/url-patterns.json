@@ -1,0 +1,145 @@
+{
+  "purpose": "What the add-camera probe tries when a user pastes a URL. Order matters: cheapest and most reliable first.",
+  "discovery": [
+    {
+      "step": 1,
+      "name": "og:image",
+      "match": "<meta[^>]+property=[\"']og:image[\"'][^>]+content=[\"']([^\"']+)",
+      "note": "Most camera pages set this to the snapshot. Resolve relative URLs against the page."
+    },
+    {
+      "step": 2,
+      "name": "twitter:image",
+      "match": "<meta[^>]+name=[\"']twitter:image[\"'][^>]+content=[\"']([^\"']+)"
+    },
+    {
+      "step": 3,
+      "name": "JSON-LD image",
+      "match": "\"image\"\\s*:\\s*\"(https?://[^\"]+\\.(?:jpe?g|png))\"",
+      "note": "Works on tourist-board and ski-resort pages that publish structured data."
+    },
+    {
+      "step": 4,
+      "name": "img candidates",
+      "match": "<img[^>]+src=[\"']([^\"']+\\.(?:jpe?g|png))[\"']",
+      "filter": ["current", "snapshot", "live", "cam", "webcam", "bild", "image", "panorama"],
+      "note": "Keep the URL whose path matches a filter word and whose dimensions are at least 320x180."
+    },
+    {
+      "step": 5,
+      "name": "meta refresh",
+      "match": "<meta[^>]+http-equiv=[\"']refresh[\"'][^>]+url=([^\"'>]+)",
+      "note": "Some cameras refresh the whole page every minute. Follow once and repeat step 1."
+    },
+    {
+      "step": 6,
+      "name": "iframe",
+      "match": "<iframe[^>]+src=[\"']([^\"']+)[\"']",
+      "note": "Follow one iframe if its host is a known camera vendor."
+    },
+    {
+      "step": 7,
+      "name": "vendor host hint",
+      "match": "(panomax|feratel|roundshot|foto-webcam|webcam\\.|cam\\.|axis|mobotix)",
+      "note": "If the page or a script references a known vendor, use the vendor pattern below instead of scraping HTML."
+    }
+  ],
+  "vendorSnapshotPaths": [
+    {
+      "vendor": "Axis",
+      "paths": [
+        "/axis-cgi/jpg/image.cgi",
+        "/axis-cgi/jpg/image.cgi?resolution=1280x720",
+        "/axis-cgi/mjpg/video.cgi",
+        "/jpg/image.jpg"
+      ],
+      "auth": "often none, otherwise digest or basic",
+      "note": "The vendor documents the snapshot endpoint; MJPEG is a stream, not a frame source."
+    },
+    {
+      "vendor": "Mobotix",
+      "paths": ["/cgi-bin/image.jpg", "/cgi-bin/image.jpg?size=1280x960", "/record/current.jpg"],
+      "auth": "basic or none"
+    },
+    {
+      "vendor": "Hikvision",
+      "paths": ["/ISAPI/Streaming/channels/101/picture", "/Streaming/channels/1/picture"],
+      "auth": "digest, almost always required"
+    },
+    {
+      "vendor": "Dahua",
+      "paths": ["/cgi-bin/snapshot.cgi", "/cgi-bin/snapshot.cgi?channel=1"],
+      "auth": "digest, almost always required"
+    },
+    {
+      "vendor": "Reolink",
+      "paths": ["/cgi-bin/api.cgi?cmd=Snap&channel=0&user={user}&password={pass}"],
+      "auth": "query credentials"
+    },
+    {
+      "vendor": "Generic",
+      "paths": [
+        "/snapshot.jpg",
+        "/image.jpg",
+        "/current.jpg",
+        "/jpg/image.jpg",
+        "/img/snapshot.jpg",
+        "/camera/current/image"
+      ],
+      "note": "Cheap to try; expect 404 on most hosts."
+    }
+  ],
+  "providerTemplates": [
+    {
+      "source": "digitraffic-fi",
+      "cameraIdShape": "^C[0-9]{7}$",
+      "imageUrl": "https://weathercam.digitraffic.fi/{id}.jpg",
+      "worksWith": "preset id from the stations listing"
+    },
+    {
+      "source": "caltrans-cwwp2",
+      "imageUrl": "read data[].cctv.imageData.static.currentImageURL",
+      "worksWith": "district JSON only; the folder name cannot be derived from the index"
+    },
+    {
+      "source": "tfl-jamcams",
+      "cameraIdShape": "^[0-9]{5}\\.[0-9]{5}$",
+      "imageUrl": "https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/{id}.jpg",
+      "videoUrl": "https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/{id}.mp4"
+    },
+    {
+      "source": "foto-webcam-eu",
+      "cameraIdShape": "^[a-z0-9-]+$",
+      "imageUrl": "https://www.foto-webcam.eu/webcam/{id}/current/1200.jpg"
+    },
+    {
+      "source": "panomax",
+      "listingUrl": "https://api.panomax.com/1.0/cams/{id}/images/day",
+      "worksWith": "numeric camera id, discoverable only from panomax.com"
+    }
+  ],
+  "validation": {
+    "schemes": ["https"],
+    "ports": [443],
+    "maxRedirects": 2,
+    "timeoutMs": 10000,
+    "maxBytes": 10485760,
+    "contentTypes": ["image/jpeg", "image/png"],
+    "magicBytes": { "image/jpeg": "FFD8FF", "image/png": "89504E47" },
+    "minDimensions": { "width": 320, "height": 180 },
+    "maxSidePx": 12000,
+    "blockedHostRanges": [
+      "0.0.0.0/8",
+      "10.0.0.0/8",
+      "100.64.0.0/10",
+      "127.0.0.0/8",
+      "169.254.0.0/16",
+      "172.16.0.0/12",
+      "192.168.0.0/16",
+      "::1/128",
+      "fc00::/7",
+      "fe80::/10",
+      "metadata endpoints (169.254.169.254, fd00:ec2::254)"
+    ]
+  }
+}

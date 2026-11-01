@@ -1,0 +1,219 @@
+{
+  "generatedAt": "2026-11-01T13:50:00Z",
+  "verifiedWith": "curl -L --compressed, 25 s timeout, browser user agent",
+  "sources": [
+    {
+      "id": "digitraffic-fi",
+      "name": "Fintraffic Digitraffic weather cameras",
+      "region": "FI",
+      "kind": "catalogue_api",
+      "cameraCount": 2273,
+      "stationCount": 814,
+      "cadenceSeconds": 600,
+      "listings": [
+        {
+          "url": "https://tie.digitraffic.fi/api/weathercam/v1/stations",
+          "format": "geojson",
+          "bytes": 37714,
+          "requires": ["Accept-Encoding: gzip", "Digitraffic-User: <app-name>"],
+          "note": "FeatureCollection of stations; flatten properties.presets[] into cameras. Coordinates are geometry.coordinates = [lon, lat, 0]."
+        },
+        {
+          "url": "https://tie.digitraffic.fi/api/weathercam/v1/stations/{stationId}",
+          "format": "geojson",
+          "note": "Station id, not preset id. Unknown ids answer 404 JSON."
+        }
+      ],
+      "image": {
+        "template": "https://weathercam.digitraffic.fi/{presetId}.jpg",
+        "format": "jpeg",
+        "verified": [
+          { "url": "https://weathercam.digitraffic.fi/C0150201.jpg", "status": 200, "bytes": 9897 },
+          { "url": "https://weathercam.digitraffic.fi/C0150301.jpg", "status": 200, "bytes": 316866 }
+        ]
+      },
+      "license": {
+        "name": "CC BY 4.0",
+        "url": "https://www.digitraffic.fi/en/terms-of-service/",
+        "attribution": "Fintraffic / Digitraffic"
+      },
+      "verifiedAt": "2026-11-01"
+    },
+    {
+      "id": "caltrans-cwwp2",
+      "name": "Caltrans CWWP2 CCTV",
+      "region": "US-CA",
+      "kind": "catalogue_api",
+      "cameraCount": 3610,
+      "cadenceSeconds": 60,
+      "listings": [
+        {
+          "url": "https://cwwp2.dot.ca.gov/data/d{district}/cctv/cctvStatusD{district:02}.json",
+          "format": "json",
+          "bytes": "845426 (d3), 2478498 (d4)",
+          "note": "District number is zero padded in the file name. Unpadded answers 500. Same data as CSV, XML, TXT.",
+          "districts": {
+            "1": { "cameras": 149, "hls": 15, "notInService": 4 },
+            "2": { "cameras": 91, "hls": 0, "notInService": 4 },
+            "3": { "cameras": 274, "hls": 269, "notInService": 4 },
+            "4": { "cameras": 769, "hls": 196, "notInService": 3 },
+            "5": { "cameras": 181, "hls": 181, "notInService": 3 },
+            "6": { "cameras": 128, "hls": 123, "notInService": 1 },
+            "7": { "cameras": 592, "hls": 478, "notInService": 105 },
+            "8": { "cameras": 505, "hls": 405, "notInService": 4 },
+            "9": { "cameras": 23, "hls": 0, "notInService": 2 },
+            "10": { "cameras": 154, "hls": 151, "notInService": 3 },
+            "11": { "cameras": 324, "hls": 235, "notInService": 0 },
+            "12": { "cameras": 420, "hls": 254, "notInService": 45 }
+          }
+        }
+      ],
+      "image": {
+        "path": "data[].cctv.imageData.static.currentImageURL",
+        "format": "jpeg",
+        "previousFrames": "data[].cctv.imageData.static.referenceImage{1..5}UpdateAgoURL",
+        "stream": "data[].cctv.imageData.streamingVideoURL (HLS, 2307 of 3610 cameras)",
+        "verified": [
+          { "url": "https://cwwp2.dot.ca.gov/data/d3/cctv/image/hwy5atpocket/hwy5atpocket.jpg", "status": 200, "bytes": 11233 },
+          { "url": "https://cwwp2.dot.ca.gov/data/d3/cctv/image/hwy5atpocket/previous/hwy5atpocket-1.jpg", "status": 200, "bytes": 12828 },
+          { "url": "https://wzmedia.dot.ca.gov/D3/5_Pocket_Rd_OC_SAC5_SB.stream/playlist.m3u8", "status": 200, "bytes": 138, "contentType": "application/vnd.apple.mpegurl" }
+        ]
+      },
+      "fields": {
+        "location": "cctv.location { latitude, longitude, locationName, nearbyPlace, route, direction, county } (numbers are strings)",
+        "inService": "cctv.inService is the string \"true\" or \"false\"",
+        "updateFrequency": "cctv.imageData.static.currentImageUpdateFrequency, in minutes"
+      },
+      "license": {
+        "name": "Free to use, fair use policy",
+        "url": "https://cwwp2.dot.ca.gov/closed-circuit-television-cameras.html",
+        "attribution": "Caltrans",
+        "quote": "Usage that risks degrading the availability of the CCTV streaming service is prohibited."
+      },
+      "verifiedAt": "2026-11-01"
+    },
+    {
+      "id": "tfl-jamcams",
+      "name": "TfL JamCams",
+      "region": "GB-LON",
+      "kind": "catalogue_api",
+      "cameraCount": 890,
+      "availableCount": 831,
+      "cadenceSeconds": 60,
+      "listings": [
+        {
+          "url": "https://api.tfl.gov.uk/Place/Type/JamCam",
+          "format": "json",
+          "bytes": 70950,
+          "note": "Values live in additionalProperties[] as { key, value } pairs. Keys: imageUrl, videoUrl, available, cameraView."
+        }
+      ],
+      "image": {
+        "path": "additionalProperties[key=imageUrl].value",
+        "format": "jpeg",
+        "host": "s3-eu-west-1.amazonaws.com",
+        "verified": [
+          { "url": "https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/00002.00865.jpg", "status": 200, "bytes": 13984 },
+          { "url": "https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/00002.00865.mp4", "status": 200, "bytes": 103775, "contentType": "video/mp4" }
+        ]
+      },
+      "license": {
+        "name": "TfL open data",
+        "url": "https://api-portal.tfl.gov.uk/terms",
+        "attribution": "Powered by TfL Open Data"
+      },
+      "verifiedAt": "2026-11-01"
+    },
+    {
+      "id": "foto-webcam-eu",
+      "name": "foto-webcam.eu",
+      "region": "AT,DE,CH,IT",
+      "kind": "page_scrape",
+      "cameraCount": 309,
+      "cadenceSeconds": 600,
+      "listings": [
+        {
+          "url": "https://www.foto-webcam.eu/",
+          "format": "html",
+          "bytes": 54646,
+          "note": "Index page lists /webcam/{name}/current/400.jpg for 309 cameras. The name in the path is the camera id."
+        }
+      ],
+      "image": {
+        "template": "https://www.foto-webcam.eu/webcam/{name}/current/{size}.jpg",
+        "sizes": [150, 180, 240, 320, 400, 640, 720, 1200],
+        "format": "jpeg",
+        "verified": [
+          { "url": "https://www.foto-webcam.eu/webcam/hochgrat/current/400.jpg", "status": 200, "bytes": 47815 },
+          { "url": "https://www.foto-webcam.eu/webcam/hochgrat/current/720.jpg", "status": 200, "bytes": 138048 },
+          { "url": "https://www.foto-webcam.eu/webcam/hochgrat/current/1200.jpg", "status": 200, "bytes": 271956 },
+          { "url": "https://www.foto-webcam.eu/webcam/feldberg/current/1200.jpg", "status": 404, "note": "unknown camera answers an HTML page with 404" }
+        ]
+      },
+      "license": {
+        "name": "Embedding allowed with a link back",
+        "url": "https://www.foto-webcam.eu/webcam/infos/",
+        "attribution": "link the image to the camera page on foto-webcam.eu",
+        "note": "Bulk archive download needs a login; robots.txt disallows /webcam/ for Googlebot-Image and SEO crawlers."
+      },
+      "verifiedAt": "2026-11-01"
+    },
+    {
+      "id": "panomax",
+      "name": "PANOMAX panoramas",
+      "region": "worldwide",
+      "kind": "per_camera_api",
+      "cameraCount": null,
+      "cadenceSeconds": 600,
+      "listings": [
+        {
+          "url": "https://api.panomax.com/1.0/cams/{camId}/images/day",
+          "format": "json",
+          "bytes": 4991,
+          "note": "No public list endpoint. sizes[] and images[] with a slot every 10 minutes. Images are tiled panoramas (rows x cols)."
+        }
+      ],
+      "image": {
+        "note": "Compose the URL from the size and the slot time; the JSON lists dimensions, not URLs, for this endpoint."
+      },
+      "license": {
+        "name": "per camera",
+        "url": "https://panomax.com/",
+        "note": "Watermarked images, brand logos present. robots.txt of api.panomax.com is Allow: /."
+      },
+      "verifiedAt": "2026-11-01"
+    },
+    {
+      "id": "windy-webcams",
+      "name": "Windy Webcams API",
+      "region": "worldwide",
+      "kind": "paid_api",
+      "role": "design reference, not a data source",
+      "listings": [
+        {
+          "url": "https://api.windy.com/webcams/api/v3/webcams",
+          "format": "json",
+          "note": "Requires header X-WINDY-API-KEY. Without it: 403 {\"message\":\"Missing Header 'x-windy-api-key' with API key\"}."
+        }
+      ],
+      "image": {
+        "template": "https://imgproxy.windy.com/_/{size}/plain/{window}/{webcamId}/original/{epoch}.jpg",
+        "note": "Fetchable without a token, but the terms forbid using images other than through API URLs. Do not scrape."
+      },
+      "license": {
+        "name": "Windy Webcams API terms",
+        "url": "https://api.windy.com/webcams/terms",
+        "note": "Free tier: link images back, courtesy mention, no stretching, 15-minute image URLs, offset cap 1000. Pro: 9990 EUR/year."
+      },
+      "verifiedAt": "2026-11-01"
+    }
+  ],
+  "rejected": [
+    { "url": "https://webcams.nyctmc.org/api/cameras", "reason": "no response within 25 s" },
+    { "url": "https://511on.ca/api/v2/get/cameras", "reason": "400, API key required" },
+    { "url": "https://www.webcams.travel/api/v3/list", "reason": "returns HTML, the API is gone" },
+    { "url": "https://images.drivebc.ca/bchighwaycam/pub/cameras/1.jpg", "reason": "connection failed from here" },
+    { "url": "https://www.roundshot.com/xml_1/internet/en/application/d1/current.jpg", "reason": "returns HTML, per-camera URLs only" },
+    { "url": "https://www.feratel.com/feratel/webcam/image/1.jpg", "reason": "404, per-camera URLs only" }
+  ]
+}

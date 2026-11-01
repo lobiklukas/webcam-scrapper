@@ -1,0 +1,26 @@
+packages:
+  - apps/*
+  - packages/*
+
+# pnpm 12 does not run dependency lifecycle scripts unless they are allowed here.
+allowBuilds:
+  '@tailwindcss/oxide': true
+  esbuild: true
+  playwright: true
+  playwright-core: true
+  unrs-resolver: true
+  '@scarf/scarf': false
+
+# Shared toolchain versions. Packages reference these with "catalog:" so the two
+# apps cannot drift onto different TypeScript / Vitest / oxc versions.
+catalog:
+  '@rsvelte/oxlint-plugin': ^0.2.6
+  '@types/node': ^24.10.1
+  '@vitest/coverage-v8': ^4.1.8
+  oxfmt: ^0.75.0
+  oxlint: ^1.90.0
+  oxlint-tsgolint: ^7.0.2005
+  turbo: ^2.11.10
+  typescript: ^6.0.3
+  vite: ^8.3.0
+  vitest: ^4.1.8

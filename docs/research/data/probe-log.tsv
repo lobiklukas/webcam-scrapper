@@ -1,0 +1,61 @@
+# Probe log, 2026-11-01T13:49:03Z, curl curl 8.7.1
+# columns: status, content-type, bytes, seconds, label, url
+200	application/json;charset=UTF-8	37714	0.087280	digitraffic stations geojson	https://tie.digitraffic.fi/api/weathercam/v1/stations
+    magic: JSON data
+200	application/json;charset=UTF-8	37714	0.090807	digitraffic stations no header	https://tie.digitraffic.fi/api/weathercam/v1/stations
+    magic: JSON data
+404	application/json;charset=UTF-8	228	0.097789	digitraffic station C01502	https://tie.digitraffic.fi/api/weathercam/v1/stations/C01502
+    magic: JSON data
+200	image/jpeg	9897	0.177098	digitraffic image preset C0150201	https://weathercam.digitraffic.fi/C0150201.jpg
+    magic: JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baselin
+200	image/jpeg	316866	0.088450	digitraffic image preset C0150301	https://weathercam.digitraffic.fi/C0150301.jpg
+    magic: JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, baselin
+200	application/json	845426	2.909124	caltrans d3 json	https://cwwp2.dot.ca.gov/data/d3/cctv/cctvStatusD03.json
+    magic: JSON data
+200	application/json	2478498	9.333366	caltrans d4 json	https://cwwp2.dot.ca.gov/data/d4/cctv/cctvStatusD04.json
+    magic: ASCII text
+200	application/octet-stream	1230774	5.494688	caltrans d4 csv	https://cwwp2.dot.ca.gov/data/d4/cctv/cctvStatusD04.csv
+    magic: CSV text
+200	image/jpeg	11233	0.699235	caltrans image	https://cwwp2.dot.ca.gov/data/d3/cctv/image/hwy5atpocket/hwy5atpocket.jpg
+    magic: JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, comment
+200	image/jpeg	12828	0.699229	caltrans previous image	https://cwwp2.dot.ca.gov/data/d3/cctv/image/hwy5atpocket/previous/hwy5atpocket-1.jpg
+    magic: JPEG image data, JFIF standard 1.01, aspect ratio, density 1x1, segment length 16, comment
+200	application/vnd.apple.mpegurl	138	0.690350	caltrans hls master	https://wzmedia.dot.ca.gov/D3/5_Pocket_Rd_OC_SAC5_SB.stream/playlist.m3u8
+    magic: M3U playlist text, ASCII text
+200	application/json; charset=utf-8	70950	0.098192	tfl jamcams	https://api.tfl.gov.uk/Place/Type/JamCam
+    magic: ASCII text, with very long lines (65536), with no line terminators
+200	image/jpeg	13984	0.127727	tfl jamcam image	https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/00002.00865.jpg
+    magic: JPEG image data, JFIF standard 1.02, aspect ratio, density 1x1, segment length 16, Exif St
+200	video/mp4	103775	0.205825	tfl jamcam video	https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/00002.00865.mp4
+    magic: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]
+200	text/html; charset=UTF-8	54646	0.123949	foto-webcam index	https://www.foto-webcam.eu/
+    magic: HTML document text, Unicode text, UTF-8 text, with very long lines (1705)
+200	image/jpeg	271956	0.110385	foto-webcam current 1200	https://www.foto-webcam.eu/webcam/hochgrat/current/1200.jpg
+    magic: JPEG image data, JFIF standard 1.01, resolution (DPI), density 96x96, segment length 16, c
+200	image/jpeg	138048	0.095953	foto-webcam current 720	https://www.foto-webcam.eu/webcam/hochgrat/current/720.jpg
+    magic: JPEG image data, JFIF standard 1.01, resolution (DPI), density 96x96, segment length 16, c
+200	image/jpeg	47815	0.105735	foto-webcam current 400	https://www.foto-webcam.eu/webcam/hochgrat/current/400.jpg
+    magic: JPEG image data, JFIF standard 1.01, resolution (DPI), density 96x96, segment length 16, c
+404	text/html; charset=UTF-8	39981	0.093145	foto-webcam unknown cam	https://www.foto-webcam.eu/webcam/feldberg/current/1200.jpg
+    magic: HTML document text, Unicode text, UTF-8 text, with very long lines (57122)
+200	application/json	4991	0.057451	panomax day images api	https://api.panomax.com/1.0/cams/168/images/day
+    magic: JSON data
+200	text/html; charset=utf-8	14428	0.710246	panomax cam page	https://panomax.com/cams/168/
+    magic: HTML document text, Unicode text, UTF-8 text, with very long lines (61714)
+200	text/plain	23	0.066757	panomax robots	https://api.panomax.com/robots.txt
+    magic: ASCII text
+403	application/json; charset=utf-8	96	0.082541	windy api v3 no key	https://api.windy.com/webcams/api/v3/webcams?limit=1
+    magic: JSON data
+200	image/jpeg	96650	0.173014	windy imgproxy direct	https://imgproxy.windy.com/_/normal/plain/current/1746057271/original.jpg?v=2
+    magic: JPEG image data, Exif standard: [TIFF image data, little-endian, direntries=6, orientation
+200	text/html; charset=utf-8	2038	0.071088	windy embed player day	https://webcams.windy.com/webcams/public/embed/player/1746057271/day?interactive=true
+    magic: HTML document text, ASCII text, with very long lines (1188)
+000		0	25.010674	nyc tmc cameras api	https://webcams.nyctmc.org/api/cameras
+ERR(28)	-	0	-	nyc tmc cameras api	https://webcams.nyctmc.org/api/cameras
+    magic: HTML document text, ASCII text, with very long lines (1188)
+400	application/xml; charset=utf-8	45	0.337430	ontario 511 cameras	https://511on.ca/api/v2/get/cameras
+    magic: ASCII text, with no line terminators
+200	text/html	2644	0.143912	webcams.travel api	https://www.webcams.travel/api/v3/list
+    magic: HTML document text, ASCII text, with very long lines (5833)
+200	text/plain; charset=UTF-8	460	0.051823	foto-webcam robots	https://www.foto-webcam.eu/robots.txt
+    magic: ASCII text

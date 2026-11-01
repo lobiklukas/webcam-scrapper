@@ -1,0 +1,21 @@
+{
+	"$schema": "../../node_modules/oxlint/configuration_schema.json",
+	"extends": ["../../.oxlintrc.json"],
+	"plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise", "node", "vitest"],
+	"env": {
+		"node": true,
+		"es2024": true
+	},
+	"jsPlugins": ["eslint-plugin-nestjs-security/oxlint"],
+	"rules": {
+		"typescript/no-floating-promises": "error",
+		"typescript/no-explicit-any": "off",
+		"nestjs-security/require-guards": "off",
+		"nestjs-security/no-missing-validation-pipe": "warn",
+		"nestjs-security/no-permissive-cors": "error",
+		"nestjs-security/no-exposed-private-fields": "warn",
+		"nestjs-security/no-res-bypass-serialization": "warn",
+		"nestjs-security/no-unsafe-multer-filename": "warn"
+	},
+	"ignorePatterns": ["**/dist/**", "**/coverage/**"]
+}

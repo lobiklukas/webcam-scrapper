@@ -1,0 +1,40 @@
+{
+	"$schema": "../../node_modules/oxlint/configuration_schema.json",
+	"extends": ["../../.oxlintrc.json", "./node_modules/@rsvelte/oxlint-plugin/recommended.json"],
+	"plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise", "vitest", "jest"],
+	"env": {
+		"browser": true,
+		"es2024": true
+	},
+	"jsPlugins": ["@rsvelte/oxlint-plugin"],
+	"rules": {
+		"no-console": ["warn", { "allow": ["warn", "error"] }],
+		"import/no-unassigned-import": "off",
+		"svelte/no-navigation-without-resolve": "off",
+		"svelte/require-each-key": "warn",
+		"svelte/a11y_click_events_have_key_events": "error",
+		"svelte/a11y_missing_attribute": "error",
+		"svelte/a11y_no_static_element_interactions": "error"
+	},
+	"ignorePatterns": ["**/.svelte-kit/**", "**/build/**", "**/drizzle/**"],
+	"overrides": [
+		{
+			"files": ["src/**/*.d.ts", "src/app.d.ts"],
+			"rules": {
+				"unicorn/require-module-specifiers": "off"
+			}
+		},
+		{
+			"files": ["src/lib/index.ts"],
+			"rules": {
+				"unicorn/no-empty-file": "off"
+			}
+		},
+		{
+			"files": ["src/lib/server/db/auth.schema.ts"],
+			"rules": {
+				"unicorn/require-module-specifiers": "off"
+			}
+		}
+	]
+}

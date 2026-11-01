@@ -1,0 +1,32 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"printWidth": 100,
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"semi": true,
+	"insertFinalNewline": true,
+	"endOfLine": "lf",
+	"sortPackageJson": true,
+	"svelte": true,
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/dist/**",
+		"**/build/**",
+		"**/.svelte-kit/**",
+		"**/.turbo/**",
+		"**/coverage/**",
+		"bun.lock",
+		"docs/research/**"
+	],
+	"overrides": [
+		{
+			"files": ["apps/web/**"],
+			"options": {
+				"sortTailwindcss": {
+					"stylesheet": "apps/web/src/routes/layout.css"
+				}
+			}
+		}
+	]
+}

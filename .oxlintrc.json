@@ -1,0 +1,41 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "promise", "node", "vitest"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "warn",
+		"perf": "warn",
+		"pedantic": "off",
+		"style": "off",
+		"restriction": "off",
+		"nursery": "off"
+	},
+	"env": {
+		"es2024": true
+	},
+	"rules": {
+		"eqeqeq": "error",
+		"no-var": "error",
+		"prefer-const": "error",
+		"no-console": "warn",
+		"no-debugger": "error",
+		"no-duplicate-imports": ["error", { "allowSeparateTypeImports": true }],
+		"no-self-compare": "error",
+		"typescript/no-explicit-any": "warn",
+		"typescript/consistent-type-imports": "warn",
+		"typescript/no-extraneous-class": ["warn", { "allowWithDecorator": true }],
+		"unicorn/prefer-node-protocol": "error",
+		"unicorn/no-array-for-each": "off",
+		"unicorn/filename-case": "off"
+	},
+	"ignorePatterns": [
+		"**/node_modules/**",
+		"**/dist/**",
+		"**/build/**",
+		"**/.svelte-kit/**",
+		"**/.turbo/**",
+		"**/coverage/**",
+		"**/drizzle/**",
+		"docs/research/data/**"
+	]
+}

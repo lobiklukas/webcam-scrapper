@@ -1,0 +1,35 @@
+{
+	"name": "windy",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"start": "turbo run start",
+		"check": "turbo run check",
+		"test": "turbo run test",
+		"lint": "oxlint && oxlint --type-aware apps/api",
+		"lint:fix": "oxlint --fix && oxlint --type-aware --fix apps/api",
+		"fmt": "oxfmt",
+		"fmt:check": "oxfmt --check",
+		"db:start": "pnpm --filter @windy/web db:start",
+		"db:push": "pnpm --filter @windy/web db:push",
+		"db:generate": "pnpm --filter @windy/web db:generate",
+		"db:migrate": "pnpm --filter @windy/web db:migrate",
+		"db:studio": "pnpm --filter @windy/web db:studio"
+	},
+	"devDependencies": {
+		"@rsvelte/oxlint-plugin": "catalog:",
+		"@types/node": "catalog:",
+		"oxfmt": "catalog:",
+		"oxlint": "catalog:",
+		"oxlint-tsgolint": "catalog:",
+		"turbo": "catalog:",
+		"typescript": "catalog:"
+	},
+	"engines": {
+		"node": ">=24"
+	},
+	"packageManager": "pnpm@12.16.1"
+}
