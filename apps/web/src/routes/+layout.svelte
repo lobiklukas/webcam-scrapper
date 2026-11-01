@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { QueryClientProvider } from '@tanstack/svelte-query';
+	import { ModeWatcher } from 'mode-watcher';
 	import * as Breadcrumb from '#lib/components/ui/breadcrumb/index.js';
 	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
 	import { createQueryClient } from '#lib/query-client.js';
@@ -7,7 +8,7 @@
 
 	import { Separator } from '#lib/components/ui/separator/index.js';
 	import AppSidebar from '#lib/components/app-sidebar.svelte';
-	import NavActions from '#lib/components/nav-actions.svelte';
+	import ModeToggle from '#lib/components/mode-toggle.svelte';
 
 	import './layout.css';
 
@@ -17,7 +18,7 @@
 	const queryClient = createQueryClient();
 </script>
 
-<svelte:head></svelte:head>
+<ModeWatcher />
 
 <QueryClientProvider client={queryClient}>
 	<Sidebar.Provider>
@@ -33,15 +34,13 @@
 					<Breadcrumb.Root>
 						<Breadcrumb.List>
 							<Breadcrumb.Item>
-								<Breadcrumb.Page class="line-clamp-1">
-									Project Management & Task Tracking
-								</Breadcrumb.Page>
+								<Breadcrumb.Page class="line-clamp-1">Webcams</Breadcrumb.Page>
 							</Breadcrumb.Item>
 						</Breadcrumb.List>
 					</Breadcrumb.Root>
 				</div>
-				<div class="ms-auto px-3">
-					<NavActions />
+				<div class="px-3">
+					<ModeToggle />
 				</div>
 			</header>
 			<div class="flex flex-1 flex-col gap-4 px-4 py-10">
